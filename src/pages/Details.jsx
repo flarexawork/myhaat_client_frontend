@@ -131,6 +131,11 @@ const Details = () => {
   }, [errorMessage, successMessage]);
 
   const buy = () => {
+    if (!userInfo) {
+      navigate("/login");
+      return;
+    }
+
     let price = 0;
     if (product.discount !== 0) {
       price =

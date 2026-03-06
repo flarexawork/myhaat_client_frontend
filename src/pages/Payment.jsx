@@ -1,24 +1,48 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Headers from '../components/Headers'
 import Footer from '../components/Footer'
 import RazorpayCheckout from '../components/RazorpayPayment'
 import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { api_url } from '../utils/config'
+import { useSelector } from 'react-redux'
 
 const Payment = () => {
 
     const navigate = useNavigate()
-    const { state: { price, items, orderId } } = useLocation()
+    const { userInfo } = useSelector((state) => state.auth)
+    const location = useLocation()
+    const price = Number(location.state?.price || 0)
+    const items = Number(location.state?.items || 0)
+    const orderId = location.state?.orderId || ""
 
     const [paymentMethod, setPaymentMethod] = useState('online')
     const [loading, setLoading] = useState(false)
+
+    useEffect(() => {
+        if (!userInfo) {
+            navigate('/login', { replace: true })
+            return
+        }
+        if (!orderId) {
+            navigate('/card', { replace: true })
+        }
+    }, [userInfo, orderId, navigate])
 
     /* -------------------------
        COD HANDLER
     -------------------------- */
 
     const handleCOD = async () => {
+        if (!userInfo) {
+            navigate('/login', { replace: true })
+            return
+        }
+
+        if (!orderId) {
+            navigate('/card', { replace: true })
+            return
+        }
 
         try {
             setLoading(true)

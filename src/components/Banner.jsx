@@ -47,14 +47,19 @@ const Banner = () => {
                 {banners &&
                   banners.length > 0 &&
                   banners.map((b, i) => (
-                    <Link
-                      className="lg-md:h-[440px] h-auto w-full block"
-                      key={i}
-                      to={`/product/details/${b.link}`}
-                    >
-                      <img className="w-full h-full" src={b.banner} alt="" />
-                      {/* {console.log("Banner",b.banner)} */}
-                    </Link>
+                    b.link ? (
+                      <Link
+                        className="lg-md:h-[440px] h-auto w-full block"
+                        key={i}
+                        to={b.link.startsWith("/") ? b.link : `/product/details/${b.link}`}
+                      >
+                        <img className="w-full h-full" src={b.banner} alt="" />
+                      </Link>
+                    ) : (
+                      <div className="lg-md:h-[440px] h-auto w-full block" key={i}>
+                        <img className="w-full h-full" src={b.banner} alt="" />
+                      </div>
+                    )
                   ))}
               </Carousel>
 

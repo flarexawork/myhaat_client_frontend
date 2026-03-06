@@ -9,6 +9,7 @@ import { api_url } from "../../utils/config";
 import { FiClock } from "react-icons/fi";
 import { IoCloseOutline } from "react-icons/io5";
 import { FiCopy } from "react-icons/fi";
+import { getDeliveryStatusMeta } from "../../utils/orderStatus";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -201,6 +202,7 @@ const Index = () => {
             <tbody>
               {recentOrders.map((o, i) => {
                 const product = o.products?.[0];
+                const deliveryMeta = getDeliveryStatusMeta(o.delivery_status);
 
                 return (
                   <tr
@@ -286,21 +288,11 @@ const Index = () => {
                       <span
                         className="px-3 py-1.5 rounded-full text-xs font-semibold"
                         style={{
-                          backgroundColor:
-                            o.delivery_status === "cancelled"
-                              ? "#FDE8EA"
-                              : o.delivery_status === "pending"
-                                ? "#FFF4E5"
-                                : "#E4F0F5",
-                          color:
-                            o.delivery_status === "cancelled"
-                              ? "#CC4255"
-                              : o.delivery_status === "pending"
-                                ? "#F38E16"
-                                : "#122C55",
+                          backgroundColor: deliveryMeta.bgColor,
+                          color: deliveryMeta.color,
                         }}
                       >
-                        {o.delivery_status.toUpperCase()}
+                        {deliveryMeta.label}
                       </span>
                     </td>
 

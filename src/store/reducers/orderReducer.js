@@ -97,6 +97,29 @@ export const get_order = createAsyncThunk(
     }
 )
 
+export const cancel_customer_order = createAsyncThunk(
+    'order/cancel_customer_order',
+    async ({ orderId, customerId }, { rejectWithValue, fulfillWithValue, getState }) => {
+        const token = getState().auth.token
+        const config = {
+            headers: {
+                authorization: `Bearer ${token}`
+            }
+        }
+
+        try {
+            const { data } = await api.put(
+                `/home/order/cancel/${orderId}`,
+                { customerId },
+                config
+            )
+            return fulfillWithValue({ ...data, orderId })
+        } catch (error) {
+            return rejectWithValue(error.response?.data)
+        }
+    }
+)
+
 export const orderReducer = createSlice({
     name: 'order',
     initialState: {
@@ -121,6 +144,26 @@ export const orderReducer = createSlice({
             payload
         }) => {
             state.myOrder = payload.order
+        },
+        [cancel_customer_order.rejected]: (state, {
+            payload
+        }) => {
+            state.errorMessage = payload?.message || payload?.error || 'Unable to cancel order'
+        },
+        [cancel_customer_order.fulfilled]: (state, {
+            payload
+        }) => {
+            state.successMessage = payload.message
+            state.myOrder = {
+                ...state.myOrder,
+                order_status: 'REJECT',
+                delivery_status: 'cancelled'
+            }
+            state.myOrders = state.myOrders.map((order) =>
+                order._id === payload.orderId
+                    ? { ...order, order_status: 'REJECT', delivery_status: 'cancelled' }
+                    : order
+            )
         }
     }
 })

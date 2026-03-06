@@ -4,6 +4,7 @@ import Footer from '../components/Footer'
 import { FaFacebookF } from 'react-icons/fa'
 import { Link,useNavigate } from 'react-router-dom'
 import { AiOutlineGoogle } from 'react-icons/ai'
+import { FiEye, FiEyeOff } from 'react-icons/fi'
 import FadeLoader from 'react-spinners/FadeLoader'
 import { useSelector, useDispatch } from 'react-redux'
 import { customer_login, messageClear } from '../store/reducers/authReducer'
@@ -19,6 +20,7 @@ const Login = () => {
         email: '',
         password: ''
     })
+    const [showPassword, setShowPassword] = useState(false)
 
     const inputHandle = (e) => {
         setState({
@@ -66,7 +68,26 @@ const Login = () => {
                                     </div>
                                     <div className='flex flex-col gap-1 mb-4'>
                                         <label htmlFor="password">Passoword</label>
-                                        <input onChange={inputHandle} value={state.password} type="password" className='w-full px-3 py-2 border border-slate-200 outline-none focus:border-indigo-500 rounded-md' id='password' name='password' placeholder='password' />
+                                        <div className='relative'>
+                                            <input
+                                                onChange={inputHandle}
+                                                value={state.password}
+                                                type={showPassword ? 'text' : 'password'}
+                                                autoComplete='current-password'
+                                                className='w-full px-3 py-2 pr-10 border border-slate-200 outline-none focus:border-indigo-500 rounded-md'
+                                                id='password'
+                                                name='password'
+                                                placeholder='password'
+                                            />
+                                            <button
+                                                type='button'
+                                                onClick={() => setShowPassword((prev) => !prev)}
+                                                className='absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700'
+                                                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                            >
+                                                {showPassword ? <FiEyeOff /> : <FiEye />}
+                                            </button>
+                                        </div>
                                     </div>
                                     <button className='px-8 w-full py-2 bg-purple-500 shadow-lg hover:shadow-indigo-500/30 text-white rounded-md'>Login</button>
                                 </form>

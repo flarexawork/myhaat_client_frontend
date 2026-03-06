@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Headers from "../components/Headers";
 import Footer from "../components/Footer";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -11,10 +11,12 @@ const Shipping = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { userInfo } = useSelector((state) => state.auth);
+  const location = useLocation();
 
-  const {
-    state: { products, price, shipping_fee, items },
-  } = useLocation();
+  const products = location.state?.products || [];
+  const price = Number(location.state?.price || 0);
+  const shipping_fee = Number(location.state?.shipping_fee || 0);
+  const items = Number(location.state?.items || 0);
 
   const [res, setRes] = useState(false);
 
@@ -37,6 +39,17 @@ const Shipping = () => {
     });
   };
 
+  useEffect(() => {
+    if (!userInfo) {
+      navigate("/login", { replace: true });
+      return;
+    }
+
+    if (!products.length) {
+      navigate("/card", { replace: true });
+    }
+  }, [userInfo, products.length, navigate]);
+
   const save = (e) => {
     e.preventDefault();
     const { name, address, phone, post, province, city, area } = state;
@@ -46,13 +59,23 @@ const Shipping = () => {
   };
 
   const placeOrder = async () => {
+    if (!userInfo) {
+      navigate("/login", { replace: true });
+      return;
+    }
+
+    if (!products.length) {
+      navigate("/card", { replace: true });
+      return;
+    }
+
     const res = await dispatch(
       place_order({
         price,
         products,
         shipping_fee,
         shippingInfo: state,
-        userId: userInfo.id,
+        userId: userInfo?.id,
         payment_type: paymentType,
         items,
       }),

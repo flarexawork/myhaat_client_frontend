@@ -38,9 +38,12 @@ function App() {
           <Route path="/products/search?" element={<SearchProducts />} />
           <Route path="/card" element={<Card />} />
           <Route path="/order/success/:orderId" element={<ConfirmOrder />} />
-          <Route path="/shipping" element={<Shipping />} />
-          <Route path="/payment" element={<Payment />} />
           <Route path="/product/details/:slug" element={<Details />} />
+
+          <Route element={<ProtectUser />}>
+            <Route path="/shipping" element={<Shipping />} />
+            <Route path="/payment" element={<Payment />} />
+          </Route>
 
           <Route path="/dashboard" element={<ProtectUser />}>
             <Route path="" element={<Dashboard />}>

@@ -29,6 +29,10 @@ const Card = () => {
   const userId = userInfo?.id;
 
   const redirect = () => {
+    if (!userInfo) {
+      navegate("/login");
+      return;
+    }
     navegate("/shipping", {
       state: {
         products: card_products,

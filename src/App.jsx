@@ -6,9 +6,14 @@ import Card from "./pages/Card";
 import Details from "./pages/Details";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
+import VerifyEmail from "./pages/VerifyEmail";
+import VerifyPending from "./pages/VerifyPending";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Shipping from "./pages/Shipping";
 import { useDispatch } from "react-redux";
 import { get_category } from "./store/reducers/homeReducer";
+import { initialize_auth } from "./store/reducers/authReducer";
 import CategoryShops from "./pages/CategoryShop";
 import SearchProducts from "./pages/SearchProducts";
 import Payment from "./pages/Payment";
@@ -21,17 +26,32 @@ import ChangePassword from "./components/dashboard/ChangePassword";
 import Order from "./components/dashboard/Order";
 import Chat from "./components/dashboard/Chat";
 import ConfirmOrder from "./pages/ConfirmOrder";
+import ScrollToTop from "./components/ScrollToTop";
 function App() {
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(get_category());
+    dispatch(initialize_auth());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+    window.scrollTo(0, 0);
   }, []);
+
   return (
     <div className="max-w-screen min-h-screen">
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/verify-pending" element={<VerifyPending />} />
+          <Route path="/email-verify" element={<VerifyEmail />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/" element={<Home />} />
           <Route path="/shops" element={<Shops />} />
           <Route path="/products?" element={<CategoryShops />} />

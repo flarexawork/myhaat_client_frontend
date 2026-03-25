@@ -8,9 +8,8 @@ import { RiProductHuntLine } from "react-icons/ri";
 import { BsChat, BsHeart } from "react-icons/bs";
 import { TfiLock } from "react-icons/tfi";
 import { BiLogInCircle } from "react-icons/bi";
-import api from "../api/api";
 import { useDispatch } from "react-redux";
-import { user_reset } from "../store/reducers/authReducer";
+import { customer_logout, user_reset } from "../store/reducers/authReducer";
 import { reset_count } from "../store/reducers/cardReducer";
 
 const Dashboard = () => {
@@ -21,13 +20,14 @@ const Dashboard = () => {
 
   const logout = async () => {
     try {
-      await api.get("/customer/logout");
-      localStorage.removeItem("customerToken");
-      dispatch(user_reset());
+      await dispatch(customer_logout());
       dispatch(reset_count());
       navigate("/login");
     } catch (error) {
       console.log(error?.response?.data);
+      dispatch(user_reset());
+      dispatch(reset_count());
+      navigate("/login");
     }
   };
 

@@ -1,227 +1,223 @@
-import React, { useEffect, useState } from 'react'
-import Headers from '../components/Headers'
-import Footer from '../components/Footer'
-import { FaFacebookF } from 'react-icons/fa'
-import FadeLoader from 'react-spinners/FadeLoader'
-import { Link, useNavigate } from 'react-router-dom'
-import { AiOutlineGoogle } from 'react-icons/ai'
-import { FiEye, FiEyeOff } from 'react-icons/fi'
-import { useSelector, useDispatch } from 'react-redux'
-import toast from 'react-hot-toast'
-
-import { customer_register, messageClear } from '../store/reducers/authReducer'
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { FiEye, FiEyeOff } from "react-icons/fi";
+import FadeLoader from "react-spinners/FadeLoader";
+import { useDispatch, useSelector } from "react-redux";
+import toast from "react-hot-toast";
+import AuthShell from "../components/auth/AuthShell";
+import {
+  customer_register,
+  messageClear,
+  setPendingEmail,
+} from "../store/reducers/authReducer";
 
 const Register = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { loader, successMessage, errorMessage, verificationRequired, pendingEmail } =
+    useSelector((state) => state.auth);
 
-    const navigate = useNavigate()
-    const { loader, successMessage, errorMessage, userInfo } = useSelector(state => state.auth)
-    const dispatch = useDispatch()
+  const [state, setState] = useState({
+    name: "",
+    email: pendingEmail || "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [fieldError, setFieldError] = useState("");
 
-    const [otp_res, set_otp_res] = useState(false)
-    const [res, setRes] = useState(false)
-
-    const [otpData, setOtpData] = useState({
-        number1: "",
-        number2: "",
-        number3: "",
-        number4: "",
+  const inputHandle = (e) => {
+    setState({
+      ...state,
+      [e.target.name]: e.target.value,
     });
+  };
 
+  const register = (e) => {
+    e.preventDefault();
 
-    const otpHandle = (e) => {
-        setOtpData({
-            ...otpData,
-            [e.target.name]: e.target.value,
-        });
-    };
-
-
-    const [state, setState] = useState({
-        name: '',
-        email: '',
-        password: ''
-    })
-    const [showPassword, setShowPassword] = useState(false)
-
-    const inputHandle = (e) => {
-        setState({
-            ...state,
-            [e.target.name]: e.target.value
-        })
+    if (!state.phone.trim()) {
+      setFieldError("Phone number is required");
+      return;
     }
-    const register = (e) => {
-        e.preventDefault()
-        dispatch(customer_register(state))
+
+    if (!/^\d{10,15}$/.test(state.phone.trim())) {
+      setFieldError("Phone number must be 10-15 digits");
+      return;
     }
-    useEffect(() => {
-        if (successMessage) {
-            toast.success(successMessage)
-            dispatch(messageClear())
-        }
-        if (errorMessage) {
-            toast.error(errorMessage)
-            dispatch(messageClear())
-        }
-        if (userInfo) {
-            navigate('/')
-        }
-    }, [successMessage, errorMessage])
 
-    // const user_register = async (e) => {
-    //     e.preventDefault()
-    //     try {
+    if (state.password !== state.confirmPassword) {
+      setFieldError("Passwords do not match");
+      return;
+    }
 
-    //         setLoader(true)
-    //         const { data } = await api.post('/api/user-register', state)
-    //         setLoader(false)
-    //         setRes(true)
-    //         toast.success(data.message)
-    //     } catch (error) {
-    //         setLoader(false)
-    //         toast.error(error.response.data.message)
-    //     }
-    // }
+    setFieldError("");
+    dispatch(setPendingEmail(state.email));
+    dispatch(customer_register(state));
+  };
 
+  useEffect(() => {
+    if (successMessage) {
+      toast.success(successMessage);
+      dispatch(messageClear());
+    }
+    if (errorMessage) {
+      toast.error(errorMessage);
+      dispatch(messageClear());
+    }
+  }, [dispatch, errorMessage, successMessage]);
 
-    // useEffect(() => {
-    //     if (res) {
-    //         const inputs = document.querySelectorAll(".otp_field");
-    //         inputs.forEach((input, index1) => {
-    //             input.addEventListener("keyup", (e) => {
-    //                 const currentInput = input,
-    //                     nextInput = input.nextElementSibling,
-    //                     prevInput = input.previousElementSibling;
-    //                 if (currentInput.value.length > 1) {
-    //                     currentInput.value = "";
-    //                     return;
-    //                 }
-    //                 if (
-    //                     nextInput &&
-    //                     nextInput.hasAttribute("disabled") &&
-    //                     currentInput.value !== ""
-    //                 ) {
-    //                     nextInput.removeAttribute("disabled");
-    //                     nextInput.focus();
-    //                 }
-    //                 if (e.key === "Backspace") {
-    //                     inputs.forEach((input, index2) => {
-    //                         if (index1 <= index2 && prevInput) {
-    //                             input.setAttribute("disabled", true);
-    //                             input.value = "";
-    //                             prevInput.focus();
-    //                         }
-    //                     });
-    //                 }
-    //                 if (!inputs[3].disabled && inputs[3].value !== "") {
-    //                     return;
-    //                 }
-    //             });
-    //         });
-    //         window.addEventListener("load", () => inputs[0].focus());
-    //     }
-    // }, [res]);
+  useEffect(() => {
+    if (verificationRequired) {
+      navigate("/verify-pending", {
+        state: {
+          email: state.email,
+        },
+      });
+    }
+  }, [navigate, state.email, verificationRequired]);
 
-
-    // const otp_submit = async (e) => {
-
-    //     e.preventDefault();
-
-    //     let otp = otpData.number1 + otpData.number2 + otpData.number3 + otpData.number4
-
-    //     otp = parseInt(otp);
-
-    //     try {
-    //         set_otp_res(true)
-    //         const { data } = await api.post(`/api/otp-submit`, { otp })
-    //         set_otp_res(false)
-    //         localStorage.setItem('canva_token', data.token)
-    //         window.location.href = '/'
-    //     } catch (error) {
-    //         set_otp_res(false)
-    //         console.log(error)
-    //         toast.error(error?.response?.data?.message)
-    //     }
-    // };
-
-    return (
-        <div>
-            {
-                loader && <div className='w-screen h-screen flex justify-center items-center fixed left-0 top-0 bg-[#38303033] z-[999]'>
-                    <FadeLoader />
-                </div>
-            }
-            <Headers />
-            <div className='bg-slate-200 mt-4'>
-                <div className='max-w-[1440px] mx-auto px-16 sm:px-5 md-lg:px-12 md:px-10 justify-center items-center p-10 sm:p-5'>
-                    <div className='grid grid-cols-2 sm:grid-cols-1 md:grid-cols-1  w-[60%] md-lg:w-full md:w-full sm:w-full mx-auto bg-white rounded-md'>
-                        <div className='px-8 py-8 md-lg:w-full md:w-full sm:w-full'>
-                            <h2 className='text-center w-full text-xl text-slate-600 font-bold'>Register</h2>
-                            <div>
-                                <form onSubmit={register} className='text-slate-600'>
-                                    <div className='flex flex-col gap-1 mb-2'>
-                                        <label htmlFor="name">Name</label>
-                                        <input onChange={inputHandle} value={state.name} type="text" className='w-full px-3 py-2 border border-slate-200 outline-none focus:border-indigo-500 rounded-md' id='name' name='name' placeholder='name' required />
-                                    </div>
-                                    <div className='flex flex-col gap-1 mb-2'>
-                                        <label htmlFor="email">Email</label>
-                                        <input onChange={inputHandle} value={state.email} type="email" className='w-full px-3 py-2 border border-slate-200 outline-none focus:border-indigo-500 rounded-md' id='email' name='email' placeholder='email' required />
-                                    </div>
-                                    <div className='flex flex-col gap-1 mb-4'>
-                                        <label htmlFor="password">Passoword</label>
-                                        <div className='relative'>
-                                            <input
-                                                onChange={inputHandle}
-                                                value={state.password}
-                                                type={showPassword ? 'text' : 'password'}
-                                                autoComplete='new-password'
-                                                className='w-full px-3 py-2 pr-10 border border-slate-200 outline-none focus:border-indigo-500 rounded-md'
-                                                id='password'
-                                                name='password'
-                                                placeholder='password'
-                                                required
-                                            />
-                                            <button
-                                                type='button'
-                                                onClick={() => setShowPassword((prev) => !prev)}
-                                                className='absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700'
-                                                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                                            >
-                                                {showPassword ? <FiEyeOff /> : <FiEye />}
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <button className='px-8 w-full py-2 bg-purple-500 shadow-lg hover:shadow-indigo-500/30 text-white rounded-md'>Register</button>
-                                </form>
-                                <div className='flex justify-center items-center py-2'>
-                                    <div className='h-[1px] bg-slate-300 w-[95%]'></div>
-                                    <span className='px-3 text-slate-600'>or</span>
-                                    <div className='h-[1px] bg-slate-300 w-[95%]'></div>
-                                </div>
-                                <button className='px-8 w-full py-2 bg-indigo-500 shadow hover:shadow-indigo-500/30 text-white rounded-md flex justify-center items-center gap-2 mb-3'>
-                                    <span><FaFacebookF /></span>
-                                    <span>Facebook</span>
-                                </button>
-                                <button className='px-8 w-full py-2 bg-orange-500 shadow hover:shadow-orange-500/30 text-white rounded-md flex justify-center items-center gap-2 mb-3'>
-                                    <span><AiOutlineGoogle /></span>
-                                    <span>Google</span>
-                                </button>
-                            </div>
-                            <div className='text-center text-slate-600 pt-1'>
-                                <p>You have a account?<Link className='text-blue-500' to='/login'> Login</Link></p>
-                            </div>
-                            {/* <div className='text-center text-slate-600 pt-1'>
-                                <p> <Link className='text-blue-500' to='/login'>Login</Link> seller account</p>
-                            </div> */}
-                        </div>
-                        <div className='w-full h-full py-4 pr-4 block md:hidden'>
-                            <img className='w-full h-[95%]' src="/images/login.jpg" alt="" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <Footer />
+  return (
+    <>
+      {loader ? (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-[#38303033]">
+          <FadeLoader color="#FF7A1A" />
         </div>
-    )
-}
+      ) : null}
 
-export default Register
+      <AuthShell
+        title="Create Account"
+        subtitle="Create your MyHaat account to track orders, wishlist products and manage checkout faster."
+        footer={
+          <>
+            Already have an account?{" "}
+            <Link className="font-medium text-[#FF7A1A]" to="/login">
+              Login
+            </Link>
+          </>
+        }
+      >
+        <form onSubmit={register} className="space-y-4 text-slate-600">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-[#0F1C2E]" htmlFor="name">
+              Name
+            </label>
+            <input
+              id="name"
+              name="name"
+              onChange={inputHandle}
+              placeholder="Enter your name"
+              type="text"
+              value={state.name}
+              className="h-11 w-full rounded-lg border border-[#E6E1DA] px-3 text-sm outline-none transition-colors focus:border-[#FF7A1A]"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-[#0F1C2E]" htmlFor="email">
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              onChange={inputHandle}
+              placeholder="Enter your email"
+              type="email"
+              value={state.email}
+              className="h-11 w-full rounded-lg border border-[#E6E1DA] px-3 text-sm outline-none transition-colors focus:border-[#FF7A1A]"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-[#0F1C2E]" htmlFor="phone">
+              Phone
+            </label>
+            <input
+              id="phone"
+              name="phone"
+              onChange={inputHandle}
+              placeholder="Enter phone number"
+              type="tel"
+              value={state.phone}
+              className="h-11 w-full rounded-lg border border-[#E6E1DA] px-3 text-sm outline-none transition-colors focus:border-[#FF7A1A]"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-[#0F1C2E]" htmlFor="password">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                id="password"
+                name="password"
+                onChange={inputHandle}
+                placeholder="Create password"
+                type={showPassword ? "text" : "password"}
+                value={state.password}
+                autoComplete="new-password"
+                className="h-11 w-full rounded-lg border border-[#E6E1DA] px-3 pr-10 text-sm outline-none transition-colors focus:border-[#FF7A1A]"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <FiEyeOff /> : <FiEye />}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label
+              className="mb-2 block text-sm font-medium text-[#0F1C2E]"
+              htmlFor="confirmPassword"
+            >
+              Confirm Password
+            </label>
+            <div className="relative">
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                onChange={inputHandle}
+                placeholder="Confirm password"
+                type={showConfirmPassword ? "text" : "password"}
+                value={state.confirmPassword}
+                autoComplete="new-password"
+                className="h-11 w-full rounded-lg border border-[#E6E1DA] px-3 pr-10 text-sm outline-none transition-colors focus:border-[#FF7A1A]"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+              >
+                {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+              </button>
+            </div>
+          </div>
+
+          {fieldError ? (
+            <div className="rounded-lg border border-[#ffd6bf] bg-[#fff8f2] px-3 py-2 text-sm text-[#c2550a]">
+              {fieldError}
+            </div>
+          ) : null}
+
+          <button className="h-11 w-full rounded-lg bg-[#FF7A1A] text-sm font-semibold text-white transition-colors hover:bg-[#e56f17]">
+            Create Account
+          </button>
+        </form>
+      </AuthShell>
+    </>
+  );
+};
+
+export default Register;

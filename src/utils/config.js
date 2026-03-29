@@ -6,7 +6,7 @@ let app_url, api_url;
 if (mode === 'production') {
 
   app_url = 'https://myhaat24.com';
-  api_url = 'https://api.myhaat24.com';
+  api_url = 'https://e-commerce-store-backend-2rgq.onrender.com';
 } else {
 
   app_url = 'http://localhost:3000';

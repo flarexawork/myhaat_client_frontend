@@ -2,10 +2,13 @@ const mode = process.env.REACT_APP_MODE;
 
 let app_url, api_url;
 
+
 if (mode === 'production') {
-  app_url = 'https://e-commerce-store-client-frontend.vercel.app';
-  api_url = 'https://e-commerce-store-backend-2rgq.onrender.com';
+
+  app_url = 'https://myhaat24.com';
+  api_url = 'https://api.myhaat24.com';
 } else {
+
   app_url = 'http://localhost:3000';
   api_url = 'http://localhost:5000';
 }

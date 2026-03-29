@@ -26,6 +26,7 @@ import ChangePassword from "./components/dashboard/ChangePassword";
 import Order from "./components/dashboard/Order";
 import Chat from "./components/dashboard/Chat";
 import ConfirmOrder from "./pages/ConfirmOrder";
+import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
 function App() {
   const dispatch = useDispatch();
@@ -54,8 +55,8 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/" element={<Home />} />
           <Route path="/shops" element={<Shops />} />
-          <Route path="/products?" element={<CategoryShops />} />
-          <Route path="/products/search?" element={<SearchProducts />} />
+          <Route path="/products" element={<CategoryShops />} />
+          <Route path="/products/search" element={<SearchProducts />} />
           <Route path="/card" element={<Card />} />
           <Route path="/order/success/:orderId" element={<ConfirmOrder />} />
           <Route path="/product/details/:slug" element={<Details />} />
@@ -66,8 +67,8 @@ function App() {
           </Route>
 
           <Route path="/dashboard" element={<ProtectUser />}>
-            <Route path="" element={<Dashboard />}>
-              <Route path="" element={<Index />} />
+            <Route element={<Dashboard />}>
+              <Route index element={<Index />} />
               <Route path="my-orders" element={<Orders />} />
               <Route path="my-wishlist" element={<Wishlist />} />
               <Route path="order/details/:orderId" element={<Order />} />
@@ -76,6 +77,7 @@ function App() {
               <Route path="chat/:sellerId" element={<Chat />} />
             </Route>
           </Route>
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </div>

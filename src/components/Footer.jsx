@@ -1,11 +1,18 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaFacebookF, FaLinkedin } from "react-icons/fa";
-import { AiFillGithub, AiOutlineTwitter } from "react-icons/ai";
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaLinkedin,
+  FaYoutube,
+  FaWhatsapp,
+} from "react-icons/fa";
+import { AiOutlineTwitter } from "react-icons/ai";
 import { useSelector } from "react-redux";
 import { AiFillShopping, AiFillHeart } from "react-icons/ai";
 import { GrMail } from "react-icons/gr";
 import { IoIosCall } from "react-icons/io";
+import { socialLinks } from "../utils/socialLinks";
 
 const Footer = () => {
   const { card_product_count, wishlist_count } = useSelector(
@@ -25,11 +32,37 @@ const Footer = () => {
     { label: "Return Policy", path: "/shipping" },
     { label: "Help Center", path: "/dashboard" },
   ];
-  const socialLinks = [
-    { icon: <FaFacebookF />, href: "https://facebook.com", label: "Facebook" },
-    { icon: <AiOutlineTwitter />, href: "https://x.com", label: "X" },
-    { icon: <FaLinkedin />, href: "https://linkedin.com", label: "LinkedIn" },
-    { icon: <AiFillGithub />, href: "https://github.com", label: "GitHub" },
+  const socialItems = [
+    {
+      icon: <FaFacebookF />,
+      href: socialLinks.facebook,
+      label: "Follow us on Facebook",
+    },
+    {
+      icon: <FaInstagram />,
+      href: socialLinks.instagram,
+      label: "Follow us on Instagram",
+    },
+    {
+      icon: <AiOutlineTwitter />,
+      href: socialLinks.twitter,
+      label: "Follow us on Twitter",
+    },
+    {
+      icon: <FaLinkedin />,
+      href: socialLinks.linkedin,
+      label: "Follow us on LinkedIn",
+    },
+    {
+      icon: <FaYoutube />,
+      href: socialLinks.youtube,
+      label: "Watch us on YouTube",
+    },
+    {
+      icon: <FaWhatsapp />,
+      href: socialLinks.whatsapp,
+      label: "Chat with us on WhatsApp",
+    },
   ];
 
   return (
@@ -56,13 +89,17 @@ const Footer = () => {
                     <span className="w-8 h-8 rounded-full bg-[#fff1e8] text-[#f97316] flex items-center justify-center">
                       <IoIosCall />
                     </span>
-                    <span>+91 6296151740</span>
+                    <a href="tel:+916296151740" className="hover:text-[#c2410c]">
+                      +91 6296151740
+                    </a>
                   </div>
                   <div className="flex items-center gap-3 text-sm text-slate-700">
                     <span className="w-8 h-8 rounded-full bg-[#fff1e8] text-[#f97316] flex items-center justify-center">
                       <GrMail />
                     </span>
-                    <span>myhaat24@gmail.com</span>
+                    <a href="mailto:myhaat24@gmail.com" className="hover:text-[#c2410c]">
+                      myhaat24@gmail.com
+                    </a>
                   </div>
                 </div>
               </div>
@@ -126,14 +163,15 @@ const Footer = () => {
               </div>
 
               <ul className="flex items-center gap-2 mt-4">
-                {socialLinks.map((item) => (
+                {socialItems.map((item) => (
                   <li key={item.label}>
                     <a
                       className="w-[34px] h-[34px] rounded-full bg-[#fff1e8] text-[#f97316] hover:bg-[#111827] hover:text-white flex justify-center items-center transition-all"
                       href={item.href}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       aria-label={item.label}
+                      title={item.label}
                     >
                       {item.icon}
                     </a>

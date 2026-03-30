@@ -15,20 +15,21 @@ import {
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loader, successMessage, errorMessage, userInfo, verificationRequired, pendingEmail } =
-    useSelector((state) => state.auth);
+  const {
+    loader,
+    successMessage,
+    errorMessage,
+    userInfo,
+    verificationRequired,
+    pendingEmail,
+  } = useSelector((state) => state.auth);
 
   const [state, setState] = useState({
     email: pendingEmail || "",
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
-  const sellerLoginUrl =
-    typeof window !== "undefined"
-      ? window.location.port === "3000"
-        ? `${window.location.protocol}//${window.location.hostname}:3001/seller/login`
-        : `${window.location.origin}/seller/login`
-      : "/seller/login";
+  const sellerLoginUrl = "https://seller.myhaat24.com/login";
 
   const inputHandle = (e) => {
     setState({
@@ -87,7 +88,10 @@ const Login = () => {
       >
         <form onSubmit={login} className="space-y-4 text-slate-600">
           <div>
-            <label className="mb-2 block text-sm font-medium text-[#0F1C2E]" htmlFor="email">
+            <label
+              className="mb-2 block text-sm font-medium text-[#0F1C2E]"
+              htmlFor="email"
+            >
               Email
             </label>
             <input
@@ -103,10 +107,16 @@ const Login = () => {
 
           <div>
             <div className="mb-2 flex items-center justify-between gap-3">
-              <label className="block text-sm font-medium text-[#0F1C2E]" htmlFor="password">
+              <label
+                className="block text-sm font-medium text-[#0F1C2E]"
+                htmlFor="password"
+              >
                 Password
               </label>
-              <Link className="text-sm font-medium text-[#FF7A1A]" to="/forgot-password">
+              <Link
+                className="text-sm font-medium text-[#FF7A1A]"
+                to="/forgot-password"
+              >
                 Forgot password?
               </Link>
             </div>

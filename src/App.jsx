@@ -28,6 +28,8 @@ import Chat from "./components/dashboard/Chat";
 import ConfirmOrder from "./pages/ConfirmOrder";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
+import About from "./pages/about/About";
+import WhatsAppButton from "./components/WhatsAppButton";
 function App() {
   const dispatch = useDispatch();
   useEffect(() => {
@@ -46,6 +48,7 @@ function App() {
     <div className="max-w-screen min-h-screen">
       <BrowserRouter>
         <ScrollToTop />
+        <WhatsAppButton />
         <Routes>
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
@@ -55,6 +58,7 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/" element={<Home />} />
           <Route path="/shops" element={<Shops />} />
+          <Route path="/about" element={<About />} />
           <Route path="/products" element={<CategoryShops />} />
           <Route path="/products/search" element={<SearchProducts />} />
           <Route path="/card" element={<Card />} />

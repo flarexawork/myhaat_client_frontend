@@ -1,17 +1,22 @@
 import React, { useEffect, useRef, useState } from "react";
 import { GrMail } from "react-icons/gr";
 import { IoIosCall } from "react-icons/io";
-import { MdKeyboardArrowRight, MdOutlineKeyboardArrowDown } from "react-icons/md";
+import {
+  MdKeyboardArrowRight,
+  MdOutlineKeyboardArrowDown,
+} from "react-icons/md";
 import {
   FaLinkedinIn,
   FaFacebookF,
+  FaInstagram,
   FaUser,
   FaLock,
   FaList,
+  FaYoutube,
+  FaWhatsapp,
 } from "react-icons/fa";
 import {
   AiOutlineTwitter,
-  AiFillGithub,
   AiFillHeart,
   AiFillShopping,
 } from "react-icons/ai";
@@ -21,12 +26,52 @@ import {
   get_card_products,
   get_wishlist_products,
 } from "../store/reducers/cardReducer";
+import { socialLinks } from "../utils/socialLinks";
 
 const navItems = [
   { label: "Home", to: "/" },
   { label: "Shop", to: "/shops" },
-  { label: "About" },
-  { label: "Contact" },
+  { label: "About Us", to: "/about" },
+  // { label: "Contact" },
+];
+
+const socialIcons = [
+  {
+    key: "facebook",
+    href: socialLinks.facebook,
+    label: "Follow us on Facebook",
+    icon: <FaFacebookF />,
+  },
+  {
+    key: "instagram",
+    href: socialLinks.instagram,
+    label: "Follow us on Instagram",
+    icon: <FaInstagram />,
+  },
+  {
+    key: "twitter",
+    href: socialLinks.twitter,
+    label: "Follow us on Twitter",
+    icon: <AiOutlineTwitter />,
+  },
+  {
+    key: "linkedin",
+    href: socialLinks.linkedin,
+    label: "Follow us on LinkedIn",
+    icon: <FaLinkedinIn />,
+  },
+  {
+    key: "youtube",
+    href: socialLinks.youtube,
+    label: "Watch us on YouTube",
+    icon: <FaYoutube />,
+  },
+  {
+    key: "whatsapp",
+    href: socialLinks.whatsapp,
+    label: "Chat with us on WhatsApp",
+    icon: <FaWhatsapp />,
+  },
 ];
 
 const Headers = () => {
@@ -103,32 +148,44 @@ const Headers = () => {
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
                 <GrMail />
-                <span>myhaat24@gmail.com</span>
+                <a
+                  href="mailto:myhaat24@gmail.com"
+                  className="hover:text-[#fdba74]"
+                >
+                  myhaat24@gmail.com
+                </a>
               </div>
               <span>my haat ecommerce</span>
             </div>
             <div className="flex items-center gap-5">
               <div className="flex items-center gap-3">
-                <a href="#">
-                  <FaFacebookF />
-                </a>
-                <a href="#">
-                  <AiOutlineTwitter />
-                </a>
-                <a href="#">
-                  <FaLinkedinIn />
-                </a>
-                <a href="#">
-                  <AiFillGithub />
-                </a>
+                {socialIcons.map((item) => (
+                  <a
+                    key={item.key}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={item.label}
+                    title={item.label}
+                    className="hover:text-[#fdba74] hover:scale-110"
+                  >
+                    {item.icon}
+                  </a>
+                ))}
               </div>
               {userInfo ? (
-                <Link to="/dashboard" className="flex items-center gap-2 font-medium">
+                <Link
+                  to="/dashboard"
+                  className="flex items-center gap-2 font-medium"
+                >
                   <FaUser />
                   <span>{userInfo.name}</span>
                 </Link>
               ) : (
-                <Link to="/login" className="flex items-center gap-2 font-medium">
+                <Link
+                  to="/login"
+                  className="flex items-center gap-2 font-medium"
+                >
                   <FaLock />
                   <span>Login</span>
                 </Link>
@@ -149,7 +206,11 @@ const Headers = () => {
                 <FaList />
               </button>
               <Link to="/" className="block w-[190px] md-lg:w-[150px]">
-                <img src="/images/logo.png" alt="logo" className="w-full h-auto object-contain" />
+                <img
+                  src="/images/logo.png"
+                  alt="logo"
+                  className="w-full h-auto object-contain"
+                />
               </Link>
               <div className="hidden md-lg:flex items-center gap-2">
                 <button
@@ -190,7 +251,9 @@ const Headers = () => {
                     }}
                     className="w-full h-[42px] rounded-lg border border-[#f3d8c9] bg-white px-3 text-sm text-slate-700 flex items-center justify-between"
                   >
-                    <span className={category ? "text-slate-700" : "text-slate-500"}>
+                    <span
+                      className={category ? "text-slate-700" : "text-slate-500"}
+                    >
                       {category || "Select category"}
                     </span>
                     <MdOutlineKeyboardArrowDown
@@ -249,7 +312,9 @@ const Headers = () => {
                     }}
                     className="w-[170px] h-full px-3 text-sm text-slate-700 flex items-center justify-between"
                   >
-                    <span className={`${category ? "text-slate-700" : "text-slate-500"} truncate pr-2`}>
+                    <span
+                      className={`${category ? "text-slate-700" : "text-slate-500"} truncate pr-2`}
+                    >
                       {category || "Category"}
                     </span>
                     <MdOutlineKeyboardArrowDown
@@ -316,7 +381,9 @@ const Headers = () => {
 
             <div className="w-3/12 lg:w-3/12 md-lg:hidden flex items-center justify-end gap-3">
               <button
-                onClick={() => navigate(userInfo ? "/dashboard/my-wishlist" : "/login")}
+                onClick={() =>
+                  navigate(userInfo ? "/dashboard/my-wishlist" : "/login")
+                }
                 className="relative w-[38px] h-[38px] rounded-full bg-[#fff1e8] text-[#f97316] flex items-center justify-center"
               >
                 <AiFillHeart />
@@ -343,7 +410,9 @@ const Headers = () => {
                   className="flex items-center gap-2 rounded-lg px-3 py-2 bg-[#fff1e8] text-[#c2410c] text-sm font-medium"
                 >
                   <FaUser />
-                  <span className="max-w-[110px] truncate">{userInfo.name}</span>
+                  <span className="max-w-[110px] truncate">
+                    {userInfo.name}
+                  </span>
                 </Link>
               ) : (
                 <Link
@@ -379,7 +448,9 @@ const Headers = () => {
               </button>
               <div
                 className={`absolute top-[46px] left-0 z-50 w-full bg-white border border-[#f3d8c9] rounded-xl shadow-lg overflow-hidden transition-all duration-300 ${
-                  categoryShow ? "max-h-0 opacity-0 translate-y-1" : "max-h-[390px] opacity-100 translate-y-0"
+                  categoryShow
+                    ? "max-h-0 opacity-0 translate-y-1"
+                    : "max-h-[390px] opacity-100 translate-y-0"
                 }`}
               >
                 <div className="px-3 py-2 border-b border-[#f7e5d8] bg-[#fff8f3]">
@@ -430,8 +501,13 @@ const Headers = () => {
                 <IoIosCall />
               </div>
               <div className="text-right">
-                <h2 className="text-sm font-medium text-slate-700">+91 6296151740</h2>
-                <span className="text-xs text-slate-500">support 24/7 time</span>
+                <a
+                  href="tel:+916296151740"
+                  className="text-sm font-medium text-slate-700 hover:text-[#c2410c]"
+                >
+                  +91 6296151740
+                </a>
+                <span className="text-xs text-slate-500"> </span>
               </div>
             </div>
           </div>
@@ -452,8 +528,16 @@ const Headers = () => {
         >
           <div className="h-full overflow-y-auto p-5">
             <div className="flex items-center justify-between">
-              <Link to="/" onClick={() => setShowShidebar(true)} className="w-[130px]">
-                <img src="/images/logo.png" alt="logo" className="w-full h-auto" />
+              <Link
+                to="/"
+                onClick={() => setShowShidebar(true)}
+                className="w-[130px]"
+              >
+                <img
+                  src="/images/logo.png"
+                  alt="logo"
+                  className="w-full h-auto"
+                />
               </Link>
               <button
                 onClick={() => setShowShidebar(true)}
@@ -521,7 +605,11 @@ const Headers = () => {
                     onClick={() => setShowShidebar(true)}
                     className="flex items-center gap-2 px-3 py-2 border-b border-[#f8e7dc] last:border-b-0 text-sm text-slate-700"
                   >
-                    <img src={c.image} alt={c.name} className="w-[26px] h-[26px] rounded-full object-cover" />
+                    <img
+                      src={c.image}
+                      alt={c.name}
+                      className="w-[26px] h-[26px] rounded-full object-cover"
+                    />
                     <span>{c.name}</span>
                   </Link>
                 ))}
@@ -529,18 +617,19 @@ const Headers = () => {
             </div>
 
             <div className="mt-6 flex items-center gap-4 text-slate-600">
-              <a href="#">
-                <FaFacebookF />
-              </a>
-              <a href="#">
-                <AiOutlineTwitter />
-              </a>
-              <a href="#">
-                <FaLinkedinIn />
-              </a>
-              <a href="#">
-                <AiFillGithub />
-              </a>
+              {socialIcons.map((item) => (
+                <a
+                  key={item.key}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={item.label}
+                  title={item.label}
+                  className="hover:text-[#c2410c] hover:scale-110"
+                >
+                  {item.icon}
+                </a>
+              ))}
             </div>
 
             <div className="mt-6 flex items-center gap-3">
@@ -548,13 +637,23 @@ const Headers = () => {
                 <IoIosCall />
               </div>
               <div>
-                <h2 className="text-sm font-medium text-slate-700">+91 6296151740</h2>
-                <span className="text-xs text-slate-500">support 24/7 time</span>
+                <a
+                  href="tel:+916296151740"
+                  className="text-sm font-medium text-slate-700 hover:text-[#c2410c]"
+                >
+                  +91 6296151740
+                </a>
+                <span className="text-xs text-slate-500"> </span>
               </div>
             </div>
             <div className="mt-4 flex items-center gap-2 text-sm text-slate-600">
               <GrMail />
-              <span>myhaat24@gmail.com</span>
+              <a
+                href="mailto:myhaat24@gmail.com"
+                className="hover:text-[#c2410c]"
+              >
+                myhaat24@gmail.com
+              </a>
             </div>
           </div>
         </aside>

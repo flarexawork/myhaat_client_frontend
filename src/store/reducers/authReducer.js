@@ -240,6 +240,30 @@ export const customer_logout = createAsyncThunk(
   },
 );
 
+export const change_password = createAsyncThunk(
+  "auth/change_password",
+  async (info, { rejectWithValue, fulfillWithValue, getState }) => {
+    try {
+      const token = getState().auth.token;
+      const { data } = await api.put(
+        "/user/change-password",
+        info,
+        {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      clearStoredAuth();
+      return fulfillWithValue(data);
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data || { message: "Unable to change password" },
+      );
+    }
+  },
+);
+
 export const authReducer = createSlice({
   name: "auth",
   initialState: {
@@ -416,6 +440,17 @@ export const authReducer = createSlice({
       state.pendingEmail = "";
       state.verificationRequired = false;
       state.errorMessage = getErrorMessage(payload, "");
+    },
+    [change_password.pending]: (state, _) => {
+      state.loader = true;
+    },
+    [change_password.rejected]: (state, { payload }) => {
+      state.loader = false;
+      state.errorMessage = getErrorMessage(payload, "Unable to change password");
+    },
+    [change_password.fulfilled]: (state, { payload }) => {
+      state.loader = false;
+      state.successMessage = payload.message || "Password changed successfully.";
     },
   },
 });

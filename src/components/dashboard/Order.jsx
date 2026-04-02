@@ -109,7 +109,7 @@ const Order = () => {
               <h2 className="text-white text-2xl font-bold mt-1 leading-tight break-all md:text-xl">
                 #{myOrder?._id}
               </h2>
-              <p className="text-[#D7E6EE] text-sm mt-1">{myOrder?.date}</p>
+              <p className="text-[#D7E6EE] text-sm mt-1">{myOrder?.date ? new Date(myOrder.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</p>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -283,14 +283,29 @@ const Order = () => {
                 </p>
 
                 <div className="mt-4 border-t pt-4" style={{ borderColor: "#E4F0F5" }}>
-                  <div className="flex justify-between text-sm text-slate-600">
-                    <span>Items Total</span>
-                    <span>₹{myOrder?.price}</span>
-                  </div>
-                  <div className="flex justify-between text-sm text-slate-600 mt-1">
-                    <span>Shipping</span>
-                    <span>Included</span>
-                  </div>
+                  {myOrder?.product_total > 0 ? (
+                    <>
+                      <div className="flex justify-between text-sm text-slate-600">
+                        <span>Product Total</span>
+                        <span>₹{myOrder.product_total}</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-slate-600 mt-1">
+                        <span>Shipping</span>
+                        <span>₹{myOrder.price - myOrder.product_total}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex justify-between text-sm text-slate-600">
+                        <span>Items Total</span>
+                        <span>₹{myOrder?.price}</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-slate-600 mt-1">
+                        <span>Shipping</span>
+                        <span>Included</span>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="mt-4 flex flex-col gap-2">

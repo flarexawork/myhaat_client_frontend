@@ -32,40 +32,47 @@ const Banner = () => {
     dispatch(get_banners());
   }, []);
   return (
-    <div className="w-full md-lg:mt-6">
-      <div className="max-w-[1440px] mx-auto px-16 sm:px-5 md-lg:px-12 md:px-10">
-        <div className="w-full flex flex-wrap md-lg:gap-8">
-          <div className="w-full">
-            <div className="my-8">
-              <Carousel
-                autoPlay={true}
-                infinite={true}
-                arrows={true}
-                showDots={true}
-                responsive={responsive}
-              >
-                {banners &&
-                  banners.length > 0 &&
-                  banners.map((b, i) => (
-                    b.link ? (
-                      <Link
-                        className="lg-md:h-[440px] h-auto w-full block"
-                        key={i}
-                        to={b.link.startsWith("/") ? b.link : `/product/details/${b.link}`}
-                      >
-                        <img className="w-full h-full" src={b.banner} alt="" />
-                      </Link>
-                    ) : (
-                      <div className="lg-md:h-[440px] h-auto w-full block" key={i}>
-                        <img className="w-full h-full" src={b.banner} alt="" />
-                      </div>
-                    )
-                  ))}
-              </Carousel>
-
-         
-            </div>
-          </div>
+    <div className="w-full">
+      <div className="max-w-[1440px] mx-auto px-14 sm:px-5 md-lg:px-12 md:px-10">
+        <div className="mt-6 w-full">
+          <Carousel
+            autoPlay={true}
+            infinite={true}
+            arrows={true}
+            showDots={true}
+            responsive={responsive}
+          >
+            {banners &&
+              banners.length > 0 &&
+              banners.map((b, i) =>
+                b.link ? (
+                  <Link
+                    className="block h-[330px] w-full overflow-hidden rounded-3xl border border-[#f3d8c9] bg-[#fff8f3]"
+                    key={i}
+                    to={b.link.startsWith("/") ? b.link : `/product/details/${b.link}`}
+                  >
+                    <img
+                      className="h-full w-full object-cover"
+                      loading={i === 0 ? "eager" : "lazy"}
+                      src={b.banner}
+                      alt="Home banner"
+                    />
+                  </Link>
+                ) : (
+                  <div
+                    className="block h-[330px] w-full overflow-hidden rounded-3xl border border-[#f3d8c9] bg-[#fff8f3]"
+                    key={i}
+                  >
+                    <img
+                      className="h-full w-full object-cover"
+                      loading={i === 0 ? "eager" : "lazy"}
+                      src={b.banner}
+                      alt="Home banner"
+                    />
+                  </div>
+                ),
+              )}
+          </Carousel>
         </div>
       </div>
     </div>

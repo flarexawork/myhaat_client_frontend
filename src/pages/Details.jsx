@@ -18,6 +18,7 @@ import {
   messageClear,
 } from "../store/reducers/cardReducer";
 import toast from "react-hot-toast";
+import { fetchShippingFee } from "../utils/shippingFee";
 
 const Details = () => {
   const navigate = useNavigate();
@@ -158,7 +159,7 @@ const Details = () => {
     );
   };
 
-  const buy = () => {
+  const buy = async () => {
     if (!userInfo) {
       navigate("/login");
       return;
@@ -168,6 +169,8 @@ const Details = () => {
       discount > 0
         ? product.price - Math.floor((product.price * product.discount) / 100)
         : product.price;
+
+    const shippingFee = await fetchShippingFee(1);
 
     navigate("/shipping", {
       state: {
@@ -185,7 +188,7 @@ const Details = () => {
           },
         ],
         price: computedPrice * quantity,
-        shipping_fee: 85,
+        shipping_fee: shippingFee,
         items: 1,
       },
     });

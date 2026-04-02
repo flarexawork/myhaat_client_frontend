@@ -69,98 +69,113 @@ const Dashboard = () => {
             >
               <ul className="py-4 px-4 space-y-1">
                 {/* Dashboard */}
-                <li
-                  className={menuItemClass("/dashboard")}
-                  style={menuItemStyle("/dashboard")}
-                  onMouseEnter={(e) => {
-                    if (location.pathname !== "/dashboard") {
-                      e.currentTarget.style.background = "#E4F0F5";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (location.pathname !== "/dashboard") {
-                      e.currentTarget.style.background = "transparent";
-                    }
-                  }}
-                >
-                  <RxDashboard className="text-lg" />
-                  <Link to="/dashboard">Dashboard</Link>
+                <li>
+                  <Link
+                    to="/dashboard"
+                    className={menuItemClass("/dashboard")}
+                    style={menuItemStyle("/dashboard")}
+                    onMouseEnter={(e) => {
+                      if (location.pathname !== "/dashboard") {
+                        e.currentTarget.style.background = "#E4F0F5";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (location.pathname !== "/dashboard") {
+                        e.currentTarget.style.background = "transparent";
+                      }
+                    }}
+                  >
+                    <RxDashboard className="text-lg" />
+                    Dashboard
+                  </Link>
                 </li>
 
                 {/* Orders */}
-                <li
-                  className={menuItemClass("/dashboard/my-orders")}
-                  style={menuItemStyle("/dashboard/my-orders")}
-                  onMouseEnter={(e) => {
-                    if (location.pathname !== "/dashboard/my-orders") {
-                      e.currentTarget.style.background = "#E4F0F5";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (location.pathname !== "/dashboard/my-orders") {
-                      e.currentTarget.style.background = "transparent";
-                    }
-                  }}
-                >
-                  <RiProductHuntLine className="text-lg" />
-                  <Link to="/dashboard/my-orders">My Orders</Link>
+                <li>
+                  <Link
+                    to="/dashboard/my-orders"
+                    className={menuItemClass("/dashboard/my-orders")}
+                    style={menuItemStyle("/dashboard/my-orders")}
+                    onMouseEnter={(e) => {
+                      if (location.pathname !== "/dashboard/my-orders") {
+                        e.currentTarget.style.background = "#E4F0F5";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (location.pathname !== "/dashboard/my-orders") {
+                        e.currentTarget.style.background = "transparent";
+                      }
+                    }}
+                  >
+                    <RiProductHuntLine className="text-lg" />
+                    My Orders
+                  </Link>
                 </li>
 
                 {/* Wishlist */}
-                <li
-                  className={menuItemClass("/dashboard/my-wishlist")}
-                  style={menuItemStyle("/dashboard/my-wishlist")}
-                  onMouseEnter={(e) => {
-                    if (location.pathname !== "/dashboard/my-wishlist") {
-                      e.currentTarget.style.background = "#E4F0F5";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (location.pathname !== "/dashboard/my-wishlist") {
-                      e.currentTarget.style.background = "transparent";
-                    }
-                  }}
-                >
-                  <BsHeart className="text-lg" />
-                  <Link to="/dashboard/my-wishlist">Wishlist</Link>
+                <li>
+                  <Link
+                    to="/dashboard/my-wishlist"
+                    className={menuItemClass("/dashboard/my-wishlist")}
+                    style={menuItemStyle("/dashboard/my-wishlist")}
+                    onMouseEnter={(e) => {
+                      if (location.pathname !== "/dashboard/my-wishlist") {
+                        e.currentTarget.style.background = "#E4F0F5";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (location.pathname !== "/dashboard/my-wishlist") {
+                        e.currentTarget.style.background = "transparent";
+                      }
+                    }}
+                  >
+                    <BsHeart className="text-lg" />
+                    Wishlist
+                  </Link>
                 </li>
 
                 {/* Chat */}
-                <li
-                  className={menuItemClass("/dashboard/chat")}
-                  style={menuItemStyle("/dashboard/chat")}
-                  onMouseEnter={(e) => {
-                    if (location.pathname !== "/dashboard/chat") {
-                      e.currentTarget.style.background = "#E4F0F5";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (location.pathname !== "/dashboard/chat") {
-                      e.currentTarget.style.background = "transparent";
-                    }
-                  }}
-                >
-                  <BsChat className="text-lg" />
-                  <Link to="/dashboard/chat">Chat</Link>
+                <li>
+                  <Link
+                    to="/dashboard/chat"
+                    className={menuItemClass("/dashboard/chat")}
+                    style={menuItemStyle("/dashboard/chat")}
+                    onMouseEnter={(e) => {
+                      if (location.pathname !== "/dashboard/chat") {
+                        e.currentTarget.style.background = "#E4F0F5";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (location.pathname !== "/dashboard/chat") {
+                        e.currentTarget.style.background = "transparent";
+                      }
+                    }}
+                  >
+                    <BsChat className="text-lg" />
+                    Chat
+                  </Link>
                 </li>
 
                 {/* Change Password */}
-                <li
-                  className={menuItemClass("/dashboard/chage-password")}
-                  style={menuItemStyle("/dashboard/chage-password")}
-                  onMouseEnter={(e) => {
-                    if (location.pathname !== "/dashboard/chage-password") {
-                      e.currentTarget.style.background = "#E4F0F5";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (location.pathname !== "/dashboard/chage-password") {
-                      e.currentTarget.style.background = "transparent";
-                    }
-                  }}
-                >
-                  <TfiLock className="text-lg" />
-                  <Link to="/dashboard/chage-password">Change Password</Link>
+                <li>
+                  <Link
+                    to="/dashboard/chage-password"
+                    className={menuItemClass("/dashboard/chage-password")}
+                    style={menuItemStyle("/dashboard/chage-password")}
+                    onMouseEnter={(e) => {
+                      if (location.pathname !== "/dashboard/chage-password") {
+                        e.currentTarget.style.background = "#E4F0F5";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (location.pathname !== "/dashboard/chage-password") {
+                        e.currentTarget.style.background = "transparent";
+                      }
+                    }}
+                  >
+                    <TfiLock className="text-lg" />
+                    Change Password
+                  </Link>
                 </li>
 
                 {/* Logout */}

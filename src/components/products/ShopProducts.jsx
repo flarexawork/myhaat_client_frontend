@@ -17,6 +17,7 @@ import {
   messageClear,
   remove_wishlist,
 } from "../../store/reducers/cardReducer";
+import { fetchShippingFee } from "../../utils/shippingFee";
 
 const ShopProducts = ({ styles, products }) => {
   const navigate = useNavigate();
@@ -112,7 +113,7 @@ const ShopProducts = ({ styles, products }) => {
     );
   };
 
-  const buy_now = (product) => {
+  const buy_now = async (product) => {
     if (!userInfo) return navigate("/login");
 
     const discount = Number(product.discount) || 0;
@@ -120,6 +121,8 @@ const ShopProducts = ({ styles, products }) => {
       discount > 0
         ? product.price - Math.floor((product.price * discount) / 100)
         : product.price;
+
+    const shippingFee = await fetchShippingFee(1);
 
     navigate("/shipping", {
       state: {
@@ -132,7 +135,7 @@ const ShopProducts = ({ styles, products }) => {
           },
         ],
         price: finalPrice,
-        shipping_fee: 85,
+        shipping_fee: shippingFee,
         items: 1,
       },
     });

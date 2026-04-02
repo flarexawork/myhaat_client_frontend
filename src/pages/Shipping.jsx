@@ -6,6 +6,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { place_order } from "../store/reducers/orderReducer";
 import axios from "axios";
 import { api_url } from "../utils/config";
+import {
+  calculateShippingFee,
+  getShippingFeeFromSettings,
+} from "../utils/shippingFee";
 
 const Shipping = () => {
   const navigate = useNavigate();
@@ -15,11 +19,12 @@ const Shipping = () => {
 
   const products = location.state?.products || [];
   const price = Number(location.state?.price || 0);
-  const shipping_fee = Number(location.state?.shipping_fee || 0);
+  const initialShippingFee = Number(location.state?.shipping_fee || 0);
   const items = Number(location.state?.items || 0);
 
   const [res, setRes] = useState(false);
   const [paymentType, setPaymentType] = useState("online");
+  const [shippingFee, setShippingFee] = useState(initialShippingFee);
   const [state, setState] = useState({
     name: "",
     address: "",
@@ -58,12 +63,54 @@ const Shipping = () => {
     }
   }, [userInfo, products.length, navigate]);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const syncShippingFee = async () => {
+      if (!products.length) return;
+
+      try {
+        const feePerGroup = await getShippingFeeFromSettings();
+        if (isMounted) {
+          setShippingFee(calculateShippingFee(feePerGroup, products.length));
+        }
+      } catch (error) {
+        if (isMounted) {
+          setShippingFee(initialShippingFee);
+        }
+      }
+    };
+
+    syncShippingFee();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [products, initialShippingFee]);
+
+  const [fieldError, setFieldError] = useState("");
+
   const save = (e) => {
     e.preventDefault();
     const { name, address, phone, post, province, city, area } = state;
-    if (name && address && phone && post && province && city && area) {
-      setRes(true);
+
+    if (!name || !address || !phone || !post || !province || !city || !area) {
+      setFieldError("All shipping fields are required");
+      return;
     }
+
+    if (!/^\d{10,15}$/.test(phone.trim())) {
+      setFieldError("Phone number must be 10-15 digits");
+      return;
+    }
+
+    if (!/^\d{6}$/.test(post.trim())) {
+      setFieldError("Post code must be exactly 6 digits");
+      return;
+    }
+
+    setFieldError("");
+    setRes(true);
   };
 
   const placeOrder = async () => {
@@ -81,7 +128,7 @@ const Shipping = () => {
       place_order({
         price,
         products,
-        shipping_fee,
+        shipping_fee: shippingFee,
         shippingInfo: state,
         userId: userInfo?.id,
         payment_type: paymentType,
@@ -188,6 +235,12 @@ const Shipping = () => {
                           </div>
                         ))}
                       </div>
+
+                      {fieldError ? (
+                        <div className="rounded-lg border border-[#ffd6bf] bg-[#fff8f2] px-3 py-2 text-sm text-[#c2550a]">
+                          {fieldError}
+                        </div>
+                      ) : null}
 
                       <button
                         className="h-11 w-full rounded-lg bg-[#FF7A1A] text-sm font-semibold text-white transition-colors hover:bg-[#e56f17]"
@@ -312,13 +365,13 @@ const Shipping = () => {
 
                   <div className="flex items-center justify-between">
                     <span>Shipping</span>
-                    <span>₹{shipping_fee}</span>
+                    <span>₹{shippingFee}</span>
                   </div>
 
                   <div className="border-t border-dashed border-[#E6E1DA] pt-3">
                     <div className="flex items-center justify-between text-[18px] font-bold text-[#0F1C2E]">
                       <span>Total</span>
-                      <span>₹{price + shipping_fee}</span>
+                      <span>₹{price + shippingFee}</span>
                     </div>
                   </div>
                 </div>

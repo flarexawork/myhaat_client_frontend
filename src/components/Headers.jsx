@@ -203,7 +203,7 @@ const Headers = () => {
               </button>
               <Link to="/" className="block w-[190px] md-lg:w-[150px]">
                 <img
-                  src="/images/logo.png"
+                  src="/images/logo2.png"
                   alt="logo"
                   className="w-full h-auto object-contain"
                 />
@@ -530,7 +530,7 @@ const Headers = () => {
                 className="w-[130px]"
               >
                 <img
-                  src="/images/logo.png"
+                  src="/images/logo2.png"
                   alt="logo"
                   className="w-full h-auto"
                 />

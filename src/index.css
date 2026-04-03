@@ -23,7 +23,14 @@
 
   body {
     margin: 0;
-    font-family: "Inter", "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family:
+      "Inter",
+      "Poppins",
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
     background: var(--mh-bg);
     color: var(--mh-ink);
   }
@@ -48,7 +55,10 @@
   }
 
   .mh-card-hover {
-    transition: transform var(--mh-transition), box-shadow var(--mh-transition), border-color var(--mh-transition);
+    transition:
+      transform var(--mh-transition),
+      box-shadow var(--mh-transition),
+      border-color var(--mh-transition);
   }
 
   .mh-card-hover:hover {
@@ -79,4 +89,11 @@
 .react-multiple-carousel__arrow,
 .react-multi-carousel-dot-list {
   z-index: 10 !important;
+}
+
+@media (max-width: 767px) {
+  .react-multiple-carousel__arrow,
+  .react-multi-carousel-dot-list {
+    display: none !important;
+  }
 }

@@ -47,12 +47,16 @@ const Banner = () => {
               banners.map((b, i) =>
                 b.link ? (
                   <Link
-                    className="block h-[330px] w-full overflow-hidden rounded-3xl border border-[#f3d8c9] bg-[#fff8f3]"
+                    className="block sm:h-auto h-[330px] w-full overflow-hidden sm:rounded-sm rounded-3xl border border-[#f3d8c9] bg-[#fff8f3]"
                     key={i}
-                    to={b.link.startsWith("/") ? b.link : `/product/details/${b.link}`}
+                    to={
+                      b.link.startsWith("/")
+                        ? b.link
+                        : `/product/details/${b.link}`
+                    }
                   >
                     <img
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-contain"
                       loading={i === 0 ? "eager" : "lazy"}
                       src={b.banner}
                       alt="Home banner"
@@ -60,11 +64,11 @@ const Banner = () => {
                   </Link>
                 ) : (
                   <div
-                    className="block h-[330px] w-full overflow-hidden rounded-3xl border border-[#f3d8c9] bg-[#fff8f3]"
+                    className="block sm:h-auto h-[330px] w-full overflow-hidden sm:rounded-sm rounded-3xl border border-[#f3d8c9] bg-[#fff8f3]"
                     key={i}
                   >
                     <img
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-contain"
                       loading={i === 0 ? "eager" : "lazy"}
                       src={b.banner}
                       alt="Home banner"

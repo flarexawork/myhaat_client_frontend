@@ -15,14 +15,17 @@ import {
   price_range_product,
   query_products,
 } from "../store/reducers/homeReducer";
+import { useNavigate } from "react-router-dom";
 
 const SearchProducts = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const category = searchParams.get("category") || "";
   const searchValue = searchParams.get("value") || "";
 
-  const { products, totalProduct, priceRange, parPage } =
-    useSelector((state) => state.home);
+  const { products, totalProduct, priceRange, parPage } = useSelector(
+    (state) => state.home,
+  );
 
   const dispatch = useDispatch();
   const [pageNumber, setPageNumber] = useState(1);
@@ -52,14 +55,7 @@ const SearchProducts = () => {
 
   useEffect(() => {
     setPageNumber(1);
-  }, [
-    category,
-    searchValue,
-    rating,
-    sortPrice,
-    lowPrice,
-    highPrice,
-  ]);
+  }, [category, searchValue, rating, sortPrice, lowPrice, highPrice]);
 
   useEffect(() => {
     dispatch(
@@ -91,6 +87,7 @@ const SearchProducts = () => {
     if (rangeData) {
       setState({ values: [rangeData.low, rangeData.high] });
     }
+    navigate("/shops");
   };
 
   const ratingOptions = [5, 4, 3, 2, 1];
@@ -109,9 +106,7 @@ const SearchProducts = () => {
     );
 
   const renderFilters = (isMobile = false) => (
-    <div
-      className="rounded-2xl border border-[#f3d8c9] bg-white p-5"
-    >
+    <div className="rounded-2xl border border-[#f3d8c9] bg-white p-5">
       <div className="flex items-center justify-between border-b border-[#f8e7dc] pb-4">
         <h2 className="text-lg font-bold text-[#1f2937]">Filters</h2>
         <button
@@ -288,7 +283,8 @@ const SearchProducts = () => {
                       )}
                       {hasPriceFilter && (
                         <span className="rounded-full bg-[#fff1e8] px-3 py-1 text-xs font-semibold text-[#c2410c]">
-                          INR {Math.floor(lowPrice)} - INR {Math.floor(highPrice)}
+                          INR {Math.floor(lowPrice)} - INR{" "}
+                          {Math.floor(highPrice)}
                         </span>
                       )}
                     </div>
@@ -393,7 +389,9 @@ const SearchProducts = () => {
                 <AiOutlineClose />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-4">{renderFilters(true)}</div>
+            <div className="flex-1 overflow-y-auto p-4">
+              {renderFilters(true)}
+            </div>
           </div>
         </aside>
       </div>

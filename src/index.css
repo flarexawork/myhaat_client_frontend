@@ -92,8 +92,7 @@
 }
 
 @media (max-width: 767px) {
-  .react-multiple-carousel__arrow,
-  .react-multi-carousel-dot-list {
+  .react-multiple-carousel__arrow {
     display: none !important;
   }
 }

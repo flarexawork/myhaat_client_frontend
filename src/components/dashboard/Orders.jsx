@@ -1,33 +1,119 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { AiOutlineShoppingCart, AiOutlineEye } from "react-icons/ai";
+import { AiOutlineEye } from "react-icons/ai";
 import { FiCopy } from "react-icons/fi";
 import { get_orders } from "../../store/reducers/orderReducer";
 import axios from "axios";
 import { api_url } from "../../utils/config";
 import { BsCreditCard } from "react-icons/bs";
-import { getDeliveryStatusMeta } from "../../utils/orderStatus";
+import {
+  getDeliveryStatusMeta,
+  normalizeStatus,
+} from "../../utils/orderStatus";
 import { formatDateTime } from "../../utils/dateFormatter";
+import {
+  getOrderAutoCancelTimer,
+  getServerTimeOffsetMs,
+} from "../../utils/orderAutoCancel";
 
 const Orders = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { userInfo } = useSelector((state) => state.auth);
-  const { myOrders } = useSelector((state) => state.order);
-  const [state, setState] = useState("all");
+  const { myOrders, serverTime } = useSelector((state) => state.order);
+  const [orderFilter] = useState("all");
   const [payingOrderId, setPayingOrderId] = useState("");
+  const [serverOffsetMs, setServerOffsetMs] = useState(0);
+  const [clockMs, setClockMs] = useState(Date.now());
+  const expiredOrderIdsRef = useRef(new Set());
   const userId = userInfo?.id;
+  const currentServerTimeMs = clockMs + serverOffsetMs;
+  const hasPendingAutoCancelOrders = myOrders.some(
+    (order) => order?.auto_cancel?.enabled,
+  );
 
   useEffect(() => {
     if (!userId) return;
-    dispatch(get_orders({ status: state, customerId: userId }));
-  }, [state, dispatch, userId]);
+    dispatch(get_orders({ status: orderFilter, customerId: userId }));
+  }, [orderFilter, dispatch, userId]);
+
+  useEffect(() => {
+    setServerOffsetMs(getServerTimeOffsetMs(serverTime));
+  }, [serverTime]);
+
+  useEffect(() => {
+    const timerId = window.setInterval(() => {
+      setClockMs(Date.now());
+    }, 1000);
+
+    return () => {
+      window.clearInterval(timerId);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!userId || !hasPendingAutoCancelOrders) return;
+
+    const pollId = window.setInterval(() => {
+      dispatch(get_orders({ status: orderFilter, customerId: userId }));
+    }, 3000);
+
+    return () => {
+      window.clearInterval(pollId);
+    };
+  }, [dispatch, hasPendingAutoCancelOrders, orderFilter, userId]);
+
+  useEffect(() => {
+    const activeOrderIds = new Set(myOrders.map((order) => order._id));
+
+    expiredOrderIdsRef.current = new Set(
+      Array.from(expiredOrderIdsRef.current).filter((orderId) =>
+        activeOrderIds.has(orderId),
+      ),
+    );
+  }, [myOrders]);
+
+  useEffect(() => {
+    if (!userId || !myOrders.length) return;
+
+    const newlyExpiredOrderIds = myOrders
+      .map((order) => {
+        const autoCancelTimer = getOrderAutoCancelTimer(
+          order,
+          currentServerTimeMs,
+        );
+
+        if (!autoCancelTimer.enabled || !autoCancelTimer.isExpired) {
+          return null;
+        }
+
+        return expiredOrderIdsRef.current.has(order._id) ? null : order._id;
+      })
+      .filter(Boolean);
+
+    if (!newlyExpiredOrderIds.length) {
+      return;
+    }
+
+    newlyExpiredOrderIds.forEach((orderId) =>
+      expiredOrderIdsRef.current.add(orderId),
+    );
+
+    dispatch(get_orders({ status: orderFilter, customerId: userId }));
+  }, [currentServerTimeMs, dispatch, myOrders, orderFilter, userId]);
 
   const payNow = async (ord) => {
     if (payingOrderId) return;
 
     try {
+      const autoCancelTimer = getOrderAutoCancelTimer(ord, currentServerTimeMs);
+
+      if (autoCancelTimer.isExpired) {
+        dispatch(get_orders({ status: orderFilter, customerId: userId }));
+        return;
+      }
+
       setPayingOrderId(ord._id);
 
       const { data } = await axios.post(
@@ -39,6 +125,9 @@ const Orders = () => {
       if (!data?.razorpayOrder) {
         if (data?.message === "Order already paid") {
           navigate(`/order/success/${ord._id}`);
+        } else if (data?.message) {
+          alert(data.message);
+          dispatch(get_orders({ status: orderFilter, customerId: userId }));
         }
         setPayingOrderId("");
         return;
@@ -92,7 +181,14 @@ const Orders = () => {
     } catch (error) {
       setPayingOrderId("");
       console.log(error.response?.data || error);
-      alert("Payment open nahi ho paya. Please try again.");
+      alert(
+        error.response?.data?.message ||
+          "Please try again.",
+      );
+
+      if (userId) {
+        dispatch(get_orders({ status: orderFilter, customerId: userId }));
+      }
     }
   };
 
@@ -124,13 +220,31 @@ const Orders = () => {
 
             {/* ===== BODY ===== */}
             <tbody>
-              {myOrders.map((o, i) => {
+              {myOrders.map((o) => {
                 const product = o.products?.[0];
-                const deliveryMeta = getDeliveryStatusMeta(o.delivery_status);
+                const autoCancelTimer = getOrderAutoCancelTimer(
+                  o,
+                  currentServerTimeMs,
+                );
+                const isLocallyExpired =
+                  autoCancelTimer.enabled && autoCancelTimer.isExpired;
+                const deliveryMeta = getDeliveryStatusMeta(
+                  isLocallyExpired ? "cancelled" : o.delivery_status,
+                );
+                const isPaid =
+                  String(o.payment_status || "").trim().toLowerCase() === "paid";
+                const isCancelledOrder =
+                  deliveryMeta.normalized === "CANCELLED" ||
+                  normalizeStatus(o.order_status) === "REJECT";
+                const canPayNow =
+                  !isPaid &&
+                  o.payment_type !== "cod" &&
+                  !isCancelledOrder &&
+                  !isLocallyExpired;
 
                 return (
                   <tr
-                    key={i}
+                    key={o._id}
                     onClick={() =>
                       navigate(`/dashboard/order/details/${o._id}`)
                     }
@@ -219,28 +333,42 @@ const Orders = () => {
 
                     {/* DELIVERY */}
                     <td className="px-6 py-6">
-                      <span
-                        className="px-3 py-1.5 rounded-full text-xs font-semibold"
-                        style={{
-                          backgroundColor: deliveryMeta.bgColor,
-                          color: deliveryMeta.color,
-                        }}
-                      >
-                        {deliveryMeta.label}
-                      </span>
+                      <div className="flex flex-col items-start gap-2">
+                        <span
+                          className="px-3 py-1.5 rounded-full text-xs font-semibold"
+                          style={{
+                            backgroundColor: deliveryMeta.bgColor,
+                            color: deliveryMeta.color,
+                          }}
+                        >
+                          {deliveryMeta.label}
+                        </span>
+
+                        {autoCancelTimer.enabled && !isLocallyExpired ? (
+                          <span
+                            className="px-3 py-2 rounded-xl text-xs font-semibold"
+                            style={{
+                              backgroundColor: autoCancelTimer.bgColor,
+                              color: autoCancelTimer.color,
+                            }}
+                          >
+                            {autoCancelTimer.text}
+                          </span>
+                        ) : null}
+                      </div>
                     </td>
 
                     {/* DATE */}
                     <td className="px-6 py-6">
                       <span className="text-xs" style={{ color: "#A6BFCC" }}>
-                        {formatDateTime(o.date)}
+                        {formatDateTime(o.createdAt || o.date)}
                       </span>
                     </td>
 
                     {/* ACTIONS */}
                     <td className="px-6 py-6 text-right">
                       <div className="flex justify-end items-center gap-3">
-                        {o.payment_status !== "paid" && o.payment_type !== "cod" && (
+                        {canPayNow && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();

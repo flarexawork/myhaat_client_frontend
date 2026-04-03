@@ -265,7 +265,7 @@ const Index = () => {
                         className="text-lg font-bold"
                         style={{ color: "#122C55" }}
                       >
-                        ₹{o.price}
+                        ₹{o.final_total || o.price}
                       </span>
                     </td>
 
@@ -275,9 +275,17 @@ const Index = () => {
                         className="px-3 py-1.5 rounded-full text-xs font-semibold"
                         style={{
                           backgroundColor:
-                            o.payment_status === "paid" ? "#E6F4EA" : "#FFF4E5",
+                            o.payment_status === "paid"
+                              ? "#E6F4EA"
+                              : o.payment_type === "cod"
+                                ? "#EEF2FF"
+                                : "#FFF4E5",
                           color:
-                            o.payment_status === "paid" ? "#2E8B57" : "#F38E16",
+                            o.payment_status === "paid"
+                              ? "#2E8B57"
+                              : o.payment_type === "cod"
+                                ? "#4F46E5"
+                                : "#F38E16",
                         }}
                       >
                         {o.payment_status.toUpperCase()}
@@ -320,7 +328,7 @@ const Index = () => {
                         </Link>
 
                         {/* PAY ICON */}
-                        {o.payment_status !== "paid" && (
+                        {o.payment_status !== "paid" && o.payment_type !== "cod" && (
                           <button
                             onClick={() => (payingOrderId ? null : payNow(o))}
                             disabled={payingOrderId === o._id}

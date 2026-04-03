@@ -178,7 +178,7 @@ const Details = () => {
           {
             sellerId: product.sellerId,
             shopName: product.shopName,
-            price: quantity * (computedPrice - Math.floor((computedPrice * 5) / 100)),
+            price: computedPrice * quantity,
             products: [
               {
                 quantity,

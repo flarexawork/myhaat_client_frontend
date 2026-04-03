@@ -8,6 +8,7 @@ import axios from "axios";
 import { api_url } from "../../utils/config";
 import { BsCreditCard } from "react-icons/bs";
 import { getDeliveryStatusMeta } from "../../utils/orderStatus";
+import { formatDateTime } from "../../utils/dateFormatter";
 
 const Orders = () => {
   const navigate = useNavigate();
@@ -189,7 +190,7 @@ const Orders = () => {
                         className="text-lg font-bold"
                         style={{ color: "#122C55" }}
                       >
-                        ₹{o.price}
+                        ₹{o.final_total || o.price}
                       </span>
                     </td>
 
@@ -199,9 +200,17 @@ const Orders = () => {
                         className="px-3 py-1.5 rounded-full text-xs font-semibold"
                         style={{
                           backgroundColor:
-                            o.payment_status === "paid" ? "#E6F4EA" : "#FFF4E5",
+                            o.payment_status === "paid"
+                              ? "#E6F4EA"
+                              : o.payment_type === "cod"
+                                ? "#EEF2FF"
+                                : "#FFF4E5",
                           color:
-                            o.payment_status === "paid" ? "#2E8B57" : "#F38E16",
+                            o.payment_status === "paid"
+                              ? "#2E8B57"
+                              : o.payment_type === "cod"
+                                ? "#4F46E5"
+                                : "#F38E16",
                         }}
                       >
                         {o.payment_status.toUpperCase()}
@@ -224,14 +233,14 @@ const Orders = () => {
                     {/* DATE */}
                     <td className="px-6 py-6">
                       <span className="text-xs" style={{ color: "#A6BFCC" }}>
-                        {o.date}
+                        {formatDateTime(o.date)}
                       </span>
                     </td>
 
                     {/* ACTIONS */}
                     <td className="px-6 py-6 text-right">
                       <div className="flex justify-end items-center gap-3">
-                        {o.payment_status !== "paid" && (
+                        {o.payment_status !== "paid" && o.payment_type !== "cod" && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();

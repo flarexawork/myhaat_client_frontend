@@ -15,6 +15,7 @@ import {
   getOrderStatusMeta,
   normalizeStatus,
 } from "../../utils/orderStatus";
+import { formatDateTime } from "../../utils/dateFormatter";
 
 const Order = () => {
   const { orderId } = useParams();
@@ -109,7 +110,7 @@ const Order = () => {
               <h2 className="text-white text-2xl font-bold mt-1 leading-tight break-all md:text-xl">
                 #{myOrder?._id}
               </h2>
-              <p className="text-[#D7E6EE] text-sm mt-1">{myOrder?.date ? new Date(myOrder.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</p>
+              <p className="text-[#D7E6EE] text-sm mt-1">{formatDateTime(myOrder?.date)}</p>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -276,33 +277,49 @@ const Order = () => {
                   Payment Summary
                 </p>
                 <h3 className="text-3xl font-bold text-[#122C55] mt-2">
-                  ₹{myOrder?.price}
+                  ₹{myOrder?.final_total || myOrder?.price}
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
-                  Including shipping fee and taxes
+                  Includes shipping after discounts
                 </p>
 
                 <div className="mt-4 border-t pt-4" style={{ borderColor: "#E4F0F5" }}>
                   {myOrder?.product_total > 0 ? (
                     <>
+                      {myOrder?.subtotal > 0 && myOrder?.subtotal !== myOrder.product_total && (
+                        <div className="flex justify-between text-sm text-slate-600">
+                          <span>Subtotal</span>
+                          <span>₹{myOrder.subtotal}</span>
+                        </div>
+                      )}
+                      {myOrder?.discount_amount > 0 && (
+                        <div className="flex justify-between text-sm text-slate-600 mt-1">
+                          <span>Discount</span>
+                          <span>-₹{myOrder.discount_amount}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between text-sm text-slate-600">
                         <span>Product Total</span>
                         <span>₹{myOrder.product_total}</span>
                       </div>
                       <div className="flex justify-between text-sm text-slate-600 mt-1">
                         <span>Shipping</span>
-                        <span>₹{myOrder.price - myOrder.product_total}</span>
+                        <span>₹{myOrder.shipping_fee || 0}</span>
+                      </div>
+                      <div className="flex justify-between text-sm font-semibold text-slate-700 mt-3 border-t pt-3" style={{ borderColor: "#E4F0F5" }}>
+                        <span>Total</span>
+                        <span>₹{myOrder.final_total || myOrder.price}</span>
                       </div>
                     </>
                   ) : (
                     <>
                       <div className="flex justify-between text-sm text-slate-600">
                         <span>Items Total</span>
-                        <span>₹{myOrder?.price}</span>
+                        <span>₹{myOrder?.final_total || myOrder?.price}</span>
                       </div>
                       <div className="flex justify-between text-sm text-slate-600 mt-1">
                         <span>Shipping</span>
-                        <span>Included</span>
+                        <span>₹{myOrder?.shipping_fee || 0}</span>
                       </div>
                     </>
                   )}

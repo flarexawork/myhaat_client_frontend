@@ -126,7 +126,8 @@ export const orderReducer = createSlice({
         myOrders: [],
         errorMessage: '',
         successMessage: '',
-        myOrder: {}
+        myOrder: {},
+        serverTime: ''
     },
     reducers: {
         messageClear: (state, _) => {
@@ -139,11 +140,13 @@ export const orderReducer = createSlice({
             payload
         }) => {
             state.myOrders = payload.orders
+            state.serverTime = payload?.serverTime || ''
         },
         [get_order.fulfilled]: (state, {
             payload
         }) => {
             state.myOrder = payload.order
+            state.serverTime = payload?.serverTime || ''
         },
         [cancel_customer_order.rejected]: (state, {
             payload
@@ -157,11 +160,27 @@ export const orderReducer = createSlice({
             state.myOrder = {
                 ...state.myOrder,
                 order_status: 'REJECT',
-                delivery_status: 'cancelled'
+                delivery_status: 'cancelled',
+                auto_cancel: {
+                    ...(state.myOrder?.auto_cancel || {}),
+                    enabled: false,
+                    expired: false,
+                    remainingMs: 0
+                }
             }
             state.myOrders = state.myOrders.map((order) =>
                 order._id === payload.orderId
-                    ? { ...order, order_status: 'REJECT', delivery_status: 'cancelled' }
+                    ? {
+                        ...order,
+                        order_status: 'REJECT',
+                        delivery_status: 'cancelled',
+                        auto_cancel: {
+                            ...(order?.auto_cancel || {}),
+                            enabled: false,
+                            expired: false,
+                            remainingMs: 0
+                        }
+                    }
                     : order
             )
         }

@@ -4,5 +4,5 @@ export const socialLinks = {
   twitter: "https://twitter.com/",
   linkedin: "https://linkedin.com/",
   youtube: "https://youtube.com/@myhaatofficial?si=6OnJ_DCjwQgFPKyE",
-  whatsapp: "https://wa.me/91 9046476558",
+  whatsapp: "https://wa.me/919046476558",
 };

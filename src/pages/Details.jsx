@@ -276,7 +276,7 @@ const Details = () => {
                   >
                     {images.map((image, index) => (
                       <SwiperSlide key={`${image}-slide-${index}`}>
-                        <div className="relative h-[450px] overflow-hidden bg-white sm:h-[350px]">
+                        <div className="relative  overflow-hidden bg-white sm:h-[350px]">
                           {!loadedImages[image] && (
                             <div className="absolute inset-0 skeleton rounded-md" />
                           )}
@@ -558,7 +558,7 @@ const Details = () => {
                     <div className="flex h-[220px] items-center justify-center bg-[#fbf7f2] p-3">
                       <img
                         alt={item.name}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-cover object-top"
                         loading="lazy"
                         src={item.images[0]}
                       />
@@ -567,7 +567,7 @@ const Details = () => {
 
                   <div className="p-3">
                     <Link
-                      className="line-clamp-2 text-sm font-medium leading-6 text-[var(--mh-ink)] hover:text-[var(--mh-primary)]"
+                      className="line-clamp-2 text-sm font-medium leading-6 min-h-[calc(1.5rem*2)] text-[var(--mh-ink)] hover:text-[var(--mh-primary)]"
                       to={`/product/details/${item.slug}`}
                     >
                       {item.name}

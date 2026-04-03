@@ -47,7 +47,7 @@ const Banner = () => {
               banners.map((b, i) =>
                 b.link ? (
                   <Link
-                    className="block sm:h-auto h-[330px] w-full overflow-hidden sm:rounded-sm rounded-3xl border border-[#f3d8c9] bg-[#fff8f3]"
+                    className="block sm:h-auto h-[330px] w-full overflow-hidden sm:rounded-sm rounded-3xl border"
                     key={i}
                     to={
                       b.link.startsWith("/")
@@ -56,7 +56,7 @@ const Banner = () => {
                     }
                   >
                     <img
-                      className="h-full w-full object-contain"
+                      className="h-full w-full "
                       loading={i === 0 ? "eager" : "lazy"}
                       src={b.banner}
                       alt="Home banner"
@@ -64,11 +64,11 @@ const Banner = () => {
                   </Link>
                 ) : (
                   <div
-                    className="block sm:h-auto h-[330px] w-full overflow-hidden sm:rounded-sm rounded-3xl border border-[#f3d8c9] bg-[#fff8f3]"
+                    className="block sm:h-auto h-[330px] w-full overflow-hidden sm:rounded-sm rounded-3xl border"
                     key={i}
                   >
                     <img
-                      className="h-full w-full object-contain"
+                      className="h-full w-full "
                       loading={i === 0 ? "eager" : "lazy"}
                       src={b.banner}
                       alt="Home banner"

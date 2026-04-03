@@ -34,13 +34,13 @@ const Categorys = () => {
     },
     xsmobile: {
       breakpoint: { max: 440, min: 0 },
-      items: 1,
+      items: 2,
     },
   };
   return (
     <div className="w-full mx-auto relative">
       <Carousel
-        //autoPlay={true}
+        autoPlay={true}
         infinite={true}
         arrows={true}
         responsive={responsive}
@@ -54,7 +54,7 @@ const Categorys = () => {
           >
             <div className="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-500 p-6 flex flex-col items-center mb-[4px]">
               {/* CIRCLE IMAGE */}
-              <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-transparent group-hover:border-gradient-to-r group-hover:from-[#1E40AF] group-hover:to-[#F97316] transition-all duration-500">
+              <div className="sm:h-20 sm:w-20 w-28 h-28 rounded-full overflow-hidden border-4 border-transparent group-hover:border-gradient-to-r group-hover:from-[#1E40AF] group-hover:to-[#F97316] transition-all duration-500">
                 <img
                   src={c.image}
                   alt="category"

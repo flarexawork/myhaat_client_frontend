@@ -15,11 +15,13 @@ import {
   price_range_product,
   query_products,
 } from "../store/reducers/homeReducer";
+import { useNavigate } from "react-router-dom";
 
 const Shops = () => {
   const { products, totalProduct, categorys, priceRange, parPage } =
     useSelector((state) => state.home);
 
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const [pageNumber, setPageNumber] = useState(1);
   const [styles, setStyles] = useState("grid");
@@ -87,6 +89,7 @@ const Shops = () => {
     if (rangeData) {
       setState({ values: [rangeData.low, rangeData.high] });
     }
+    navigate("/shops");
   };
 
   const ratingOptions = [5, 4, 3, 2, 1];

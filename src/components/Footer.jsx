@@ -75,7 +75,7 @@ const Footer = () => {
                 <div className="inline-flex items-center rounded-xl bg-white px-4 py-2 border border-[#f3d8c9] shadow-sm">
                   <img
                     className="w-[170px] h-auto"
-                    src="/images/logo.png"
+                    src="/images/logo2.png"
                     alt="shopp.my"
                   />
                 </div>

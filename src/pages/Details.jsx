@@ -41,6 +41,7 @@ const Details = () => {
   const thumbnailRefs = useRef([]);
 
   const images = product.images || [];
+  const isSingleImage = images.length <= 1;
   const discount = Number(product.discount) || 0;
   const finalPrice =
     discount > 0
@@ -226,7 +227,7 @@ const Details = () => {
         <div className="grid grid-cols-[45%_55%] gap-8 lg:gap-6 md-lg:grid-cols-1 md-lg:gap-5">
           <div className="min-w-0">
             <div className="grid grid-cols-[80px_minmax(0,1fr)] gap-4 md:grid-cols-1">
-              {images.length > 1 && (
+              {images.length >= 1 && (
                 <div className="max-h-[420px] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:hidden">
                   <div className="flex flex-col gap-2">
                     {images.map((image, index) => (
@@ -252,7 +253,7 @@ const Details = () => {
                       >
                         <img
                           alt={product.name || "Product"}
-                          className="h-[70px] w-[70px] object-cover"
+                          className="h-auto w-auto object-cover"
                           loading="lazy"
                           src={image}
                         />
@@ -264,59 +265,61 @@ const Details = () => {
 
               <div className="min-w-0">
                 <div className="relative min-w-0 overflow-hidden rounded-[8px] bg-white">
-                <Swiper
-                  allowTouchMove={true}
-                  className="w-full"
-                  onSlideChange={(swiper) => setImageIndex(swiper.activeIndex)}
-                  onSwiper={setGallerySwiper}
-                  slidesPerView={1}
-                >
-                  {images.map((image, index) => (
-                    <SwiperSlide key={`${image}-slide-${index}`}>
-                      <div className="relative h-[450px] overflow-hidden bg-white sm:h-[350px]">
-                        {!loadedImages[image] && (
-                          <div className="absolute inset-0 skeleton rounded-md" />
-                        )}
-                        <img
-                          alt={product.name || "Product"}
-                          className={`h-full w-full ${
-                            loadedImages[image] ? "opacity-100" : "opacity-0"
-                          }`}
-                          loading={index === 0 ? "eager" : "lazy"}
-                          onLoad={() => handleImageLoad(image)}
-                          src={image}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                            objectPosition: "top",
-                          }}
-                        />
-                      </div>
-                    </SwiperSlide>
-                  ))}
-                </Swiper>
+                  <Swiper
+                    allowTouchMove={true}
+                    className="w-full"
+                    onSlideChange={(swiper) =>
+                      setImageIndex(swiper.activeIndex)
+                    }
+                    onSwiper={setGallerySwiper}
+                    slidesPerView={1}
+                  >
+                    {images.map((image, index) => (
+                      <SwiperSlide key={`${image}-slide-${index}`}>
+                        <div className="relative h-[450px] overflow-hidden bg-white sm:h-[350px]">
+                          {!loadedImages[image] && (
+                            <div className="absolute inset-0 skeleton rounded-md" />
+                          )}
+                          <img
+                            alt={product.name || "Product"}
+                            className={`h-full w-full ${
+                              loadedImages[image] ? "opacity-100" : "opacity-0"
+                            }`}
+                            loading={index === 0 ? "eager" : "lazy"}
+                            onLoad={() => handleImageLoad(image)}
+                            src={image}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                              objectPosition: "top",
+                            }}
+                          />
+                        </div>
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
 
-                {images.length > 1 && (
-                  <>
-                    <button
-                      aria-label="Previous image"
-                      className="absolute left-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm hover:text-[var(--mh-primary)]"
-                      onClick={() => syncImage(imageIndex - 1)}
-                      type="button"
-                    >
-                      <FiChevronLeft size={18} />
-                    </button>
-                    <button
-                      aria-label="Next image"
-                      className="absolute right-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm hover:text-[var(--mh-primary)]"
-                      onClick={() => syncImage(imageIndex + 1)}
-                      type="button"
-                    >
-                      <FiChevronRight size={18} />
-                    </button>
-                  </>
-                )}
+                  {images.length > 1 && (
+                    <>
+                      <button
+                        aria-label="Previous image"
+                        className="absolute left-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm hover:text-[var(--mh-primary)]"
+                        onClick={() => syncImage(imageIndex - 1)}
+                        type="button"
+                      >
+                        <FiChevronLeft size={18} />
+                      </button>
+                      <button
+                        aria-label="Next image"
+                        className="absolute right-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm hover:text-[var(--mh-primary)]"
+                        onClick={() => syncImage(imageIndex + 1)}
+                        type="button"
+                      >
+                        <FiChevronRight size={18} />
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -365,7 +368,9 @@ const Details = () => {
               <div className="flex text-base text-[#ffb347]">
                 <Ratings ratings={product.rating} />
               </div>
-              <span className="text-sm text-slate-500">{totalReview} reviews</span>
+              <span className="text-sm text-slate-500">
+                {totalReview} reviews
+              </span>
             </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -444,7 +449,10 @@ const Details = () => {
 
             <div className="mt-6 grid grid-cols-2 gap-x-8 gap-y-3 sm:grid-cols-1 sm:gap-y-2">
               {metaRows.map((item) => (
-                <div key={item.label} className="grid grid-cols-[86px_minmax(0,1fr)] gap-3">
+                <div
+                  key={item.label}
+                  className="grid grid-cols-[86px_minmax(0,1fr)] gap-3"
+                >
                   <span className="text-sm text-slate-400">{item.label}</span>
                   <span className="text-sm text-slate-700">{item.value}</span>
                 </div>
@@ -496,7 +504,9 @@ const Details = () => {
             <div
               className="text-[14px] leading-[1.6] text-slate-600 [&_h1]:mb-3 [&_h1]:text-lg [&_h1]:font-semibold [&_h2]:mb-3 [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:mb-2 [&_h3]:text-base [&_h3]:font-semibold [&_li]:ml-5 [&_li]:list-disc [&_ol]:ml-5 [&_ol]:list-decimal [&_p]:mb-3 [&_ul]:mb-3"
               dangerouslySetInnerHTML={{
-                __html: product.description || "No description available for this product.",
+                __html:
+                  product.description ||
+                  "No description available for this product.",
               }}
             />
           )}
@@ -504,7 +514,10 @@ const Details = () => {
           {activeTab === "specifications" && (
             <div className="grid grid-cols-2 gap-x-10 gap-y-3 md:grid-cols-1">
               {specificationRows.map((item) => (
-                <div key={item.label} className="grid grid-cols-[90px_minmax(0,1fr)] gap-3">
+                <div
+                  key={item.label}
+                  className="grid grid-cols-[90px_minmax(0,1fr)] gap-3"
+                >
                   <span className="text-sm text-slate-400">{item.label}</span>
                   <span className="text-sm text-slate-700">{item.value}</span>
                 </div>

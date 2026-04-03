@@ -15,11 +15,7 @@ import {
   FaYoutube,
   FaWhatsapp,
 } from "react-icons/fa";
-import {
-  AiOutlineTwitter,
-  AiFillHeart,
-  AiFillShopping,
-} from "react-icons/ai";
+import { AiOutlineTwitter, AiFillHeart, AiFillShopping } from "react-icons/ai";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -502,10 +498,10 @@ const Headers = () => {
               </div>
               <div className="text-right">
                 <a
-                  href="tel:+916296151740"
+                  href="tel:+919046476558"
                   className="text-sm font-medium text-slate-700 hover:text-[#c2410c]"
                 >
-                  +91 6296151740
+                  +919046476558
                 </a>
                 <span className="text-xs text-slate-500"> </span>
               </div>
@@ -638,10 +634,10 @@ const Headers = () => {
               </div>
               <div>
                 <a
-                  href="tel:+916296151740"
+                  href="tel:+91 9046476558"
                   className="text-sm font-medium text-slate-700 hover:text-[#c2410c]"
                 >
-                  +91 6296151740
+                  +919046476558
                 </a>
                 <span className="text-xs text-slate-500"> </span>
               </div>

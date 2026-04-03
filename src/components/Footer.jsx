@@ -89,8 +89,8 @@ const Footer = () => {
                     <span className="w-8 h-8 rounded-full bg-[#fff1e8] text-[#f97316] flex items-center justify-center">
                       <IoIosCall />
                     </span>
-                    <a href="tel:+916296151740" className="hover:text-[#c2410c]">
-                      +91 6296151740
+                    <a href="tel:+919046476558" className="hover:text-[#c2410c]">
+                      +91 9046476558
                     </a>
                   </div>
                   <div className="flex items-center gap-3 text-sm text-slate-700">

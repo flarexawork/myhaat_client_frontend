@@ -10,6 +10,7 @@ import { FiClock } from "react-icons/fi";
 import { IoCloseOutline } from "react-icons/io5";
 import { FiCopy } from "react-icons/fi";
 import { getDeliveryStatusMeta } from "../../utils/orderStatus";
+import { formatDateTime } from "../../utils/dateFormatter";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -299,7 +300,7 @@ const Index = () => {
                     {/* DATE */}
                     <td className="px-6 py-6">
                       <span className="text-xs" style={{ color: "#A6BFCC" }}>
-                        {o.date}
+                        {formatDateTime(o.date)}
                       </span>
                     </td>
 

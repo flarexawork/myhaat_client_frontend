@@ -8,6 +8,7 @@ import axios from "axios";
 import { api_url } from "../../utils/config";
 import { BsCreditCard } from "react-icons/bs";
 import { getDeliveryStatusMeta } from "../../utils/orderStatus";
+import { formatDateTime } from "../../utils/dateFormatter";
 
 const Orders = () => {
   const navigate = useNavigate();
@@ -224,7 +225,7 @@ const Orders = () => {
                     {/* DATE */}
                     <td className="px-6 py-6">
                       <span className="text-xs" style={{ color: "#A6BFCC" }}>
-                        {o.date}
+                        {formatDateTime(o.date)}
                       </span>
                     </td>
 

@@ -15,6 +15,7 @@ import {
   messageClear,
 } from "../store/reducers/homeReducer";
 import { get_orders } from "../store/reducers/orderReducer";
+import { formatDateTime } from "../utils/dateFormatter";
 
 const ratingLabels = [
   { label: "5 star", value: 5, index: 0 },
@@ -165,7 +166,7 @@ const Reviews = ({ product }) => {
                       <Ratings ratings={review.rating} />
                     </div>
                   </div>
-                  <span className="text-sm text-slate-400">{review.date}</span>
+                  <span className="text-sm text-slate-400">{formatDateTime(review.date)}</span>
                 </div>
                 <p className="mt-4 text-sm leading-7 text-slate-600">
                   {review.review}

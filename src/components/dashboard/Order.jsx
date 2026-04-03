@@ -15,6 +15,7 @@ import {
   getOrderStatusMeta,
   normalizeStatus,
 } from "../../utils/orderStatus";
+import { formatDateTime } from "../../utils/dateFormatter";
 
 const Order = () => {
   const { orderId } = useParams();
@@ -109,7 +110,7 @@ const Order = () => {
               <h2 className="text-white text-2xl font-bold mt-1 leading-tight break-all md:text-xl">
                 #{myOrder?._id}
               </h2>
-              <p className="text-[#D7E6EE] text-sm mt-1">{myOrder?.date ? new Date(myOrder.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</p>
+              <p className="text-[#D7E6EE] text-sm mt-1">{formatDateTime(myOrder?.date)}</p>
             </div>
 
             <div className="flex flex-wrap gap-2">

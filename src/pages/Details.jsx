@@ -304,7 +304,7 @@ const Details = () => {
                     <>
                       <button
                         aria-label="Previous image"
-                        className="absolute left-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm hover:text-[var(--mh-primary)]"
+                        className="absolute  sm:hidden left-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm hover:text-[var(--mh-primary)]"
                         onClick={() => syncImage(imageIndex - 1)}
                         type="button"
                       >
@@ -312,7 +312,7 @@ const Details = () => {
                       </button>
                       <button
                         aria-label="Next image"
-                        className="absolute right-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm hover:text-[var(--mh-primary)]"
+                        className="absolute sm:hidden right-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm hover:text-[var(--mh-primary)]"
                         onClick={() => syncImage(imageIndex + 1)}
                         type="button"
                       >

@@ -11,6 +11,7 @@ import Ratings from "../components/Ratings";
 import Reviews from "../components/Reviews";
 import ProductPageSkeleton from "../components/skeletons/ProductPageSkeleton";
 import ProductCardSkeleton from "../components/skeletons/ProductCardSkeleton";
+import ProductShareButton from "../components/products/ProductShareButton";
 import { get_product } from "../store/reducers/homeReducer";
 import {
   add_to_card,
@@ -41,12 +42,12 @@ const Details = () => {
   const thumbnailRefs = useRef([]);
 
   const images = product.images || [];
-  const isSingleImage = images.length <= 1;
   const discount = Number(product.discount) || 0;
   const finalPrice =
     discount > 0
       ? product.price - Math.floor((product.price * discount) / 100)
       : product.price || 0;
+  const shareImage = images[imageIndex] || images[0] || "";
 
   const metaRows = [
     { label: "Brand", value: product.brand || "MyHaat" },
@@ -360,9 +361,18 @@ const Details = () => {
           </div>
 
           <div className="min-w-0">
-            <h1 className="text-[22px] font-semibold leading-[1.4] text-[var(--mh-ink)]">
-              {product.name}
-            </h1>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <h1 className="text-[22px] font-semibold leading-[1.4] text-[var(--mh-ink)]">
+                {product.name}
+              </h1>
+
+              <ProductShareButton
+                className="shrink-0"
+                productImage={shareImage}
+                productName={product.name}
+                productPrice={finalPrice}
+              />
+            </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <div className="flex text-base text-[#ffb347]">

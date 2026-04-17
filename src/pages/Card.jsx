@@ -13,6 +13,7 @@ import {
   quantity_inc,
   quantity_dec,
 } from "../store/reducers/cardReducer";
+import ProductImage from "../components/ProductImage";
 
 const Card = () => {
   const dispatch = useDispatch();
@@ -136,11 +137,12 @@ const Card = () => {
                             key={item._id}
                             className="grid grid-cols-[96px_minmax(0,1fr)_160px] gap-4 rounded-[24px] border border-[var(--mh-border)] bg-[#fffdfb] p-4 sm:grid-cols-1"
                           >
-                            <img
+                            <ProductImage
                               alt={item.productInfo.name}
-                              className="h-24 w-24 rounded-2xl object-cover"
+                              className="w-24 rounded-2xl border border-[var(--mh-border)]"
+                              imgClassName="p-2"
                               loading="lazy"
-                              src={item.productInfo.images[0]}
+                              src={item.productInfo.images?.[0]}
                             />
 
                             <div className="min-w-0">
@@ -223,11 +225,12 @@ const Card = () => {
                             key={item._id}
                             className="grid grid-cols-[96px_minmax(0,1fr)_120px] gap-4 rounded-[24px] border border-[var(--mh-border)] bg-[#fffdfb] p-4 sm:grid-cols-1"
                           >
-                            <img
+                            <ProductImage
                               alt={product.name}
-                              className="h-24 w-24 rounded-2xl object-cover"
+                              className="w-24 rounded-2xl border border-[var(--mh-border)]"
+                              imgClassName="p-2"
                               loading="lazy"
-                              src={product.images[0]}
+                              src={product.images?.[0]}
                             />
                             <div>
                               <h4 className="text-base font-semibold text-[var(--mh-ink)]">

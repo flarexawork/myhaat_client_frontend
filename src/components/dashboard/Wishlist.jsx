@@ -11,6 +11,7 @@ import {
   messageClear,
 } from "../../store/reducers/cardReducer";
 import toast from "react-hot-toast";
+import ProductImage from "../ProductImage";
 const Wishlist = () => {
   const dispatch = useDispatch();
   const { userInfo } = useSelector((state) => state.auth);
@@ -74,15 +75,16 @@ const Wishlist = () => {
             >
 
               {/* IMAGE */}
-              <div className="relative w-full h-[260px] overflow-hidden">
+              <div className="relative w-full">
                 <Link
                   to={`/product/details/${p.slug}`}
-                  className="block w-full h-full"
+                  className="block w-full"
                 >
-                  <img
-                    src={p.image}
+                  <ProductImage
                     alt={p.name}
-                    className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                    className="w-full"
+                    imgClassName="p-4"
+                    src={p.image}
                   />
                 </Link>
 

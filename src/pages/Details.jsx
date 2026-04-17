@@ -12,6 +12,7 @@ import Reviews from "../components/Reviews";
 import ProductPageSkeleton from "../components/skeletons/ProductPageSkeleton";
 import ProductCardSkeleton from "../components/skeletons/ProductCardSkeleton";
 import ProductShareButton from "../components/products/ProductShareButton";
+import ProductImage from "../components/ProductImage";
 import { get_product } from "../store/reducers/homeReducer";
 import {
   add_to_card,
@@ -42,12 +43,13 @@ const Details = () => {
   const thumbnailRefs = useRef([]);
 
   const images = product.images || [];
+  const galleryImages = images.length ? images : [null];
   const discount = Number(product.discount) || 0;
   const finalPrice =
     discount > 0
       ? product.price - Math.floor((product.price * discount) / 100)
       : product.price || 0;
-  const shareImage = images[imageIndex] || images[0] || "";
+  const shareImage = galleryImages[imageIndex] || galleryImages[0] || "";
 
   const metaRows = [
     { label: "Brand", value: product.brand || "MyHaat" },
@@ -105,10 +107,10 @@ const Details = () => {
     }
   }, [imageIndex]);
 
-  const handleImageLoad = (image) => {
+  const handleImageLoad = (imageKey) => {
     setLoadedImages((prev) => ({
       ...prev,
-      [image]: true,
+      [imageKey]: true,
     }));
   };
 
@@ -153,7 +155,7 @@ const Details = () => {
         productId: selectedProduct._id,
         name: selectedProduct.name,
         price: selectedProduct.price,
-        image: selectedProduct.images[0],
+        image: selectedProduct.images?.[0] || "",
         discount: selectedProduct.discount,
         rating: selectedProduct.rating,
         slug: selectedProduct.slug,
@@ -252,9 +254,10 @@ const Details = () => {
                         }}
                         type="button"
                       >
-                        <img
-                          alt={product.name || "Product"}
-                          className="h-auto w-auto object-cover"
+                        <ProductImage
+                          alt={`${product.name || "Product"} ${index + 1}`}
+                          className="w-[80px]"
+                          imgClassName="p-1"
                           loading="lazy"
                           src={image}
                         />
@@ -275,30 +278,29 @@ const Details = () => {
                     onSwiper={setGallerySwiper}
                     slidesPerView={1}
                   >
-                    {images.map((image, index) => (
-                      <SwiperSlide key={`${image}-slide-${index}`}>
-                        <div className="relative  overflow-hidden bg-white sm:h-auto">
-                          {!loadedImages[image] && (
-                            <div className="absolute inset-0 skeleton rounded-md" />
-                          )}
-                          <img
-                            alt={product.name || "Product"}
-                            className={`h-full w-full ${
-                              loadedImages[image] ? "opacity-100" : "opacity-0"
-                            }`}
-                            loading={index === 0 ? "eager" : "lazy"}
-                            onLoad={() => handleImageLoad(image)}
-                            src={image}
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                              objectPosition: "top",
-                            }}
-                          />
-                        </div>
-                      </SwiperSlide>
-                    ))}
+                    {galleryImages.map((image, index) => {
+                      const imageKey = image || "fallback-image";
+
+                      return (
+                        <SwiperSlide key={`${imageKey}-slide-${index}`}>
+                          <div className="relative overflow-hidden rounded-[8px] border border-[var(--mh-border)] bg-white sm:h-auto">
+                            {!loadedImages[imageKey] && (
+                              <div className="absolute inset-0 skeleton rounded-[8px]" />
+                            )}
+                            <ProductImage
+                              alt={product.name || "Product"}
+                              className="w-full rounded-[8px]"
+                              imgClassName={`p-5 transition-opacity duration-200 sm:p-4 ${
+                                loadedImages[imageKey] ? "opacity-100" : "opacity-0"
+                              }`}
+                              loading={index === 0 ? "eager" : "lazy"}
+                              onLoad={() => handleImageLoad(imageKey)}
+                              src={image}
+                            />
+                          </div>
+                        </SwiperSlide>
+                      );
+                    })}
                   </Swiper>
 
                   {images.length > 1 && (
@@ -348,9 +350,10 @@ const Details = () => {
                     }}
                     type="button"
                   >
-                    <img
-                      alt={product.name || "Product"}
-                      className="h-[70px] w-[70px] object-cover"
+                    <ProductImage
+                      alt={`${product.name || "Product"} ${index + 1}`}
+                      className="w-[70px]"
+                      imgClassName="p-1"
                       loading="lazy"
                       src={image}
                     />
@@ -565,14 +568,13 @@ const Details = () => {
                   className="overflow-hidden rounded-xl bg-white shadow-[0_8px_22px_rgba(15,23,42,0.06)] transition-transform duration-200 hover:-translate-y-1"
                 >
                   <Link to={`/product/details/${item.slug}`}>
-                    <div className="flex h-[220px] items-center justify-center bg-[#fbf7f2] p-3">
-                      <img
-                        alt={item.name}
-                        className="h-full w-full object-cover object-top"
-                        loading="lazy"
-                        src={item.images[0]}
-                      />
-                    </div>
+                    <ProductImage
+                      alt={item.name}
+                      className="w-full"
+                      imgClassName="p-4"
+                      loading="lazy"
+                      src={item.images?.[0]}
+                    />
                   </Link>
 
                   <div className="p-3">

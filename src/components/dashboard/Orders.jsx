@@ -16,6 +16,7 @@ import {
   getOrderAutoCancelTimer,
   getServerTimeOffsetMs,
 } from "../../utils/orderAutoCancel";
+import ProductImage from "../ProductImage";
 
 const Orders = () => {
   const navigate = useNavigate();
@@ -256,13 +257,14 @@ const Orders = () => {
                       <div className="flex items-start gap-4">
                         {/* IMAGE */}
                         <div
-                          className="w-16 h-16 rounded-xl overflow-hidden border bg-[#FCF6E3] flex-shrink-0"
+                          className="flex-shrink-0"
                           style={{ borderColor: "#E4F0F5" }}
                         >
-                          <img
-                            src={product?.images?.[0]}
+                          <ProductImage
                             alt={product?.name}
-                            className="w-full h-full object-cover object-top"
+                            className="w-16 rounded-xl border"
+                            imgClassName="p-1.5"
+                            src={product?.images?.[0]}
                           />
                         </div>
 

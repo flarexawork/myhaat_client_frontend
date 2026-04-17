@@ -3,7 +3,7 @@ import React from "react";
 const ProductCardSkeleton = ({ compact = false }) => {
   return (
     <div className="rounded-[24px] border border-[var(--mh-border)] bg-[var(--mh-card)] p-4 shadow-[var(--mh-shadow)]">
-      <div className={`skeleton rounded-[20px] ${compact ? "h-[220px]" : "h-[320px]"} w-full`} />
+      <div className={`skeleton aspect-square w-full rounded-[20px] ${compact ? "max-h-[220px]" : ""}`} />
       <div className="mt-4 space-y-3">
         <div className="skeleton h-4 w-20 rounded-full" />
         <div className="skeleton h-5 w-full rounded-full" />

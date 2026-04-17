@@ -7,6 +7,7 @@ import {
 } from "react-icons/ai";
 import { BsCartCheckFill } from "react-icons/bs";
 import Ratings from "../Ratings";
+import ProductImage from "../ProductImage";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -92,7 +93,7 @@ const ShopProducts = ({ styles, products }) => {
           productId: product._id,
           name: product.name,
           price: product.price,
-          image: product.images[0],
+          image: product.images?.[0] || "",
           discount: product.discount,
           rating: product.rating,
           slug: product.slug,
@@ -161,7 +162,7 @@ const ShopProducts = ({ styles, products }) => {
             ? p.price - Math.floor((p.price * discount) / 100)
             : p.price;
 
-        const primaryImage = p.images?.[0] || "/images/default-product.png";
+        const primaryImage = p.images?.[0] || "";
 
         const cleanedDescription = p.description
           ? p.description.replace(/(<([^>]+)>)/gi, "")
@@ -181,20 +182,21 @@ const ShopProducts = ({ styles, products }) => {
           >
             {/* IMAGE */}
             <div
-              className={`relative overflow-hidden ${
+              className={`relative ${
                 styles === "grid"
-                  ? "h-[300px]"
-                  : "w-[280px] h-[260px] md:w-[240px] sm:w-full"
+                  ? "w-full"
+                  : "w-[260px] shrink-0 md:w-[220px] sm:w-full"
               }`}
             >
               <button
                 onClick={() => openDetails(p.slug)}
-                className="w-full h-full"
+                className="block w-full"
               >
-                <img
-                  src={primaryImage}
+                <ProductImage
                   alt={p.name}
-                  className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                  className="w-full"
+                  imgClassName="p-4"
+                  src={primaryImage}
                 />
               </button>
 

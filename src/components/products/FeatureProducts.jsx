@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Ratings from "../Ratings";
 import ProductCardSkeleton from "../skeletons/ProductCardSkeleton";
+import ProductImage from "../ProductImage";
 import {
   add_to_card,
   get_wishlist_products,
@@ -65,7 +66,7 @@ const FeatureProducts = ({ products, loading = false }) => {
         productId: pro._id,
         name: pro.name,
         price: pro.price,
-        image: pro.images[0],
+        image: pro.images?.[0] || "",
         discount: pro.discount,
         rating: pro.rating,
         slug: pro.slug,
@@ -127,14 +128,13 @@ const FeatureProducts = ({ products, loading = false }) => {
               className="group overflow-hidden rounded-[22px] border border-[#f2dfd4] bg-white shadow-[0_8px_22px_rgba(15,23,42,0.07)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_30px_rgba(15,23,42,0.15)]"
             >
               <div className="relative">
-                <div className="h-[330px] overflow-hidden bg-[#f7ede6] sm:h-[290px]">
-                  <img
-                    loading="lazy"
-                    className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                    src={p.images[0]}
-                    alt={p.name}
-                  />
-                </div>
+                <ProductImage
+                  alt={p.name}
+                  className="w-full"
+                  imgClassName="p-4 sm:p-3"
+                  loading="lazy"
+                  src={p.images?.[0]}
+                />
 
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/35 via-black/8 to-transparent" />
 

@@ -16,6 +16,7 @@ import {
   normalizeStatus,
 } from "../../utils/orderStatus";
 import { formatDateTime } from "../../utils/dateFormatter";
+import ProductImage from "../ProductImage";
 
 const Order = () => {
   const { orderId } = useParams();
@@ -206,10 +207,11 @@ const Order = () => {
                     >
                       <div className="flex items-center gap-4 sm:flex-col sm:items-start">
                         <div className="w-20 h-20 rounded-lg overflow-hidden border border-[#E4F0F5] bg-white flex-shrink-0">
-                          <img
-                            className="w-full h-full object-cover"
-                            src={p?.images?.[0]}
+                          <ProductImage
                             alt={p?.name || "product"}
+                            className="w-20 rounded-lg"
+                            imgClassName="p-2"
+                            src={p?.images?.[0]}
                           />
                         </div>
 

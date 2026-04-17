@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Range, getTrackBackground } from "react-range";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
@@ -6,89 +6,49 @@ import { AiFillStar, AiOutlineClose } from "react-icons/ai";
 import { CiStar } from "react-icons/ci";
 import { BsFillGridFill } from "react-icons/bs";
 import { FaThList } from "react-icons/fa";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import Headers from "../components/Headers";
 import Footer from "../components/Footer";
 import ShopProducts from "../components/products/ShopProducts";
 import Pagination from "../components/Pagination";
-import {
-  price_range_product,
-  query_products,
-} from "../store/reducers/homeReducer";
 import { useNavigate } from "react-router-dom";
+import ShopProductsSkeleton from "../components/skeletons/ShopProductsSkeleton";
+import useProductListing from "../hooks/useProductListing";
 
 const Shops = () => {
-  const { products, totalProduct, categorys, priceRange, parPage } =
-    useSelector((state) => state.home);
+  const { categorys } = useSelector((state) => state.home);
 
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const [pageNumber, setPageNumber] = useState(1);
   const [styles, setStyles] = useState("grid");
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [category, setCategory] = useState("");
-  const [state, setState] = useState({ values: [50, 100] });
-  const [rating, setRatingQ] = useState("");
-  const [sortPrice, setSortPrice] = useState("");
-  const [rangeData, setRangeData] = useState(null);
-  const [lowPrice, highPrice] = state.values;
-
-  useEffect(() => {
-    dispatch(price_range_product());
-  }, [dispatch]);
-
-  useEffect(() => {
-    const low = Number(priceRange.low) || 0;
-    const high = Number(priceRange.high) || 100;
-    const normalizedHigh = low === high ? high + 100 : high;
-
-    setRangeData({
-      low,
-      high: normalizedHigh,
-    });
-    setState({ values: [low, normalizedHigh] });
-  }, [priceRange.high, priceRange.low]);
+  const {
+    error,
+    loading,
+    pageNumber,
+    parPage,
+    priceValues,
+    products,
+    rangeData,
+    rating,
+    resetListingFilters,
+    retry,
+    setPageNumber,
+    setPriceValues,
+    setRating,
+    setSortPrice,
+    sortPrice,
+    totalProduct,
+  } = useProductListing({ category });
+  const [lowPrice, highPrice] = priceValues;
 
   const queryCategory = (value) => {
     setCategory((prev) => (prev === value ? "" : value));
   };
 
-  useEffect(() => {
-    setPageNumber(1);
-  }, [category, rating, sortPrice, lowPrice, highPrice]);
-
-  useEffect(() => {
-    if (!rangeData) return;
-
-    dispatch(
-      query_products({
-        low: lowPrice,
-        high: highPrice,
-        category,
-        rating,
-        sortPrice,
-        pageNumber,
-      }),
-    );
-  }, [
-    dispatch,
-    rangeData,
-    lowPrice,
-    highPrice,
-    category,
-    rating,
-    sortPrice,
-    pageNumber,
-  ]);
-
   const resetFilters = () => {
+    resetListingFilters();
     setCategory("");
-    setRatingQ("");
-    setSortPrice("");
-    setPageNumber(1);
-    if (rangeData) {
-      setState({ values: [rangeData.low, rangeData.high] });
-    }
     navigate("/shops");
   };
 
@@ -151,15 +111,15 @@ const Shops = () => {
               step={1}
               min={rangeData.low}
               max={rangeData.high}
-              values={state.values}
-              onChange={(values) => setState({ values })}
+              values={priceValues}
+              onChange={setPriceValues}
               renderTrack={({ props, children }) => (
                 <div
                   {...props}
                   style={{
                     ...props.style,
                     background: getTrackBackground({
-                      values: state.values,
+                      values: priceValues,
                       colors: ["#f6dfd2", "#f97316", "#f6dfd2"],
                       min: rangeData.low,
                       max: rangeData.high,
@@ -181,7 +141,9 @@ const Shops = () => {
         </div>
 
         <div className="mt-4 rounded-xl bg-[#fff7f2] px-3 py-2 text-sm font-semibold text-[#c2410c]">
-          INR {Math.floor(lowPrice)} - INR {Math.floor(highPrice)}
+          {rangeData
+            ? `INR ${Math.floor(lowPrice)} - INR ${Math.floor(highPrice)}`
+            : "Loading range..."}
         </div>
       </div>
 
@@ -193,7 +155,7 @@ const Shops = () => {
           {ratingOptions.map((value) => (
             <button
               key={value}
-              onClick={() => setRatingQ(value)}
+              onClick={() => setRating(value)}
               className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-sm transition-colors ${
                 Number(rating) === value
                   ? "border-[#f97316] bg-[#fff1e8] text-[#c2410c]"
@@ -207,7 +169,7 @@ const Shops = () => {
             </button>
           ))}
           <button
-            onClick={() => setRatingQ("")}
+            onClick={() => setRating("")}
             className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
               rating
                 ? "border-[#f2dfd4] bg-white text-slate-600 hover:border-[#f8c9ad] hover:bg-[#fff8f3]"
@@ -269,7 +231,7 @@ const Shops = () => {
                 Open Filters
               </button>
               <span className="text-sm font-medium text-slate-600">
-                {totalProduct} results
+                {loading ? "Loading results..." : `${totalProduct} results`}
               </span>
             </div>
           </div>
@@ -284,7 +246,7 @@ const Shops = () => {
                 <div className="flex items-center justify-between gap-4 md:flex-col md:items-start">
                   <div>
                     <h2 className="text-xl font-bold text-slate-800 sm:text-lg">
-                      {totalProduct} products found
+                      {loading ? "Loading products..." : `${totalProduct} products found`}
                     </h2>
                     <p className="mt-1 text-sm text-slate-500">
                       Filter, sort and explore products from trusted sellers.
@@ -347,7 +309,22 @@ const Shops = () => {
               </div>
 
               <div className="pb-8 pt-6">
-                {products.length > 0 ? (
+                {loading ? (
+                  <ShopProductsSkeleton styles={styles} />
+                ) : error ? (
+                  <div className="rounded-2xl border border-dashed border-[#f8c9ad] bg-white px-5 py-12 text-center">
+                    <h3 className="text-lg font-semibold text-slate-800">
+                      We couldn&apos;t load products right now
+                    </h3>
+                    <p className="mt-2 text-sm text-slate-500">{error}</p>
+                    <button
+                      onClick={retry}
+                      className="mt-4 rounded-xl bg-[#f97316] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#ea580c]"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                ) : Array.isArray(products) && products.length > 0 ? (
                   <ShopProducts products={products} styles={styles} />
                 ) : (
                   <div className="rounded-2xl border border-dashed border-[#f3d8c9] bg-white px-5 py-12 text-center">
@@ -368,7 +345,7 @@ const Shops = () => {
                 )}
               </div>
 
-              {totalProduct > parPage && (
+              {!loading && totalProduct > parPage && (
                 <div className="flex justify-center">
                   <Pagination
                     pageNumber={pageNumber}

@@ -277,7 +277,7 @@ const Details = () => {
                   >
                     {images.map((image, index) => (
                       <SwiperSlide key={`${image}-slide-${index}`}>
-                        <div className="relative  overflow-hidden bg-white sm:h-[350px]">
+                        <div className="relative  overflow-hidden bg-white">
                           {!loadedImages[image] && (
                             <div className="absolute inset-0 skeleton rounded-md" />
                           )}

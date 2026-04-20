@@ -3,6 +3,7 @@ import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { Link } from "react-router-dom";
+import ProductImage from "../ProductImage";
 
 const CollectionSkeleton = () => (
   <div className="flex flex-col gap-3">
@@ -123,16 +124,15 @@ const Products = ({ title, products, loading = false }) => {
                 <Link
                   key={j}
                   to={`/product/details/${product?.slug}`}
-                  className="grid grid-cols-[96px_minmax(0,1fr)] items-center gap-3 p-3 rounded-xl bg-white hover:bg-[#fff7f0] shadow-sm hover:shadow-md transition-all duration-300 border border-[#f3e4da] group"
+                  className="grid grid-cols-[96px_minmax(0,1fr)] items-center gap-3 rounded-xl border border-[#f3e4da] bg-white p-3 transition-all duration-300 group hover:bg-[#fff7f0] hover:shadow-md sm:grid-cols-[80px_minmax(0,1fr)]"
                 >
-                  <div className="w-[96px] h-[96px] sm:w-[80px] sm:h-[80px] rounded-xl overflow-hidden bg-gradient-to-b from-[#fffaf7] via-[#fff3ea] to-[#fffaf7] border border-[#f3e4da] flex-shrink-0">
-                    <img
-                      loading="lazy"
-                      className="w-full h-full object-contain p-2.5 group-hover:scale-105 transition-transform duration-300"
-                      src={product.images[0]}
-                      alt={product.name}
-                    />
-                  </div>
+                  <ProductImage
+                    alt={product.name}
+                    className="w-[96px] flex-shrink-0 rounded-xl border border-[#f3e4da] sm:w-[80px]"
+                    imgClassName="p-2.5"
+                    loading="lazy"
+                    src={product.images?.[0]}
+                  />
 
                   <div className="flex flex-col justify-center text-gray-700 w-full min-w-0">
                     <div className="flex items-start justify-between gap-2">

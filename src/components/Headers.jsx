@@ -18,6 +18,7 @@ import {
 import { AiOutlineTwitter, AiFillHeart, AiFillShopping } from "react-icons/ai";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import toast from "react-hot-toast";
 import {
   get_card_products,
   get_wishlist_products,
@@ -92,7 +93,27 @@ const Headers = () => {
   const mobileCategoryRef = useRef(null);
 
   const search = () => {
-    navigate(`/products/search?category=${category}&&value=${searchValue}`);
+    const selectedCategory = category.trim();
+    const searchKeyword = searchValue.trim();
+
+    if (!selectedCategory) {
+      toast.error("Please select category first");
+      return;
+    }
+
+    const searchParams = new URLSearchParams({ category: selectedCategory });
+
+    if (searchKeyword) {
+      searchParams.set("value", searchKeyword);
+    }
+
+    navigate(`/products/search?${searchParams.toString()}`);
+  };
+
+  const handleSearchKeyDown = (event) => {
+    if (event.key === "Enter") {
+      search();
+    }
   };
 
   const redirect_card_page = () => {
@@ -236,7 +257,7 @@ const Headers = () => {
               </div>
             </div>
 
-            <div className="w-6/12 lg:w-5/12 md-lg:w-full">
+            <div className="w-6/12 lg:w-5/12 md-lg:w-full md-lg:max-w-[calc(100vw-96px)] md:max-w-[calc(100vw-80px)] sm:max-w-[calc(100vw-40px)]">
               <div className="hidden md-lg:block mb-2" ref={mobileCategoryRef}>
                 <div className="relative">
                   <button
@@ -273,7 +294,7 @@ const Headers = () => {
                           onClick={() => selectSearchCategory("")}
                           className="w-full text-left rounded-md px-2.5 py-2 text-sm text-slate-600 hover:bg-[#fff5ee] hover:text-[#c2410c]"
                         >
-                          All categories
+                          Clear selection
                         </button>
                       </li>
                       {categorys.map((c, i) => (
@@ -339,7 +360,7 @@ const Headers = () => {
                           onClick={() => selectSearchCategory("")}
                           className="w-full text-left rounded-md px-2.5 py-2 text-sm text-slate-600 hover:bg-[#fff5ee] hover:text-[#c2410c]"
                         >
-                          All categories
+                          Clear selection
                         </button>
                       </li>
                       {categorys.map((c, i) => (
@@ -361,14 +382,20 @@ const Headers = () => {
                   </div>
                 </div>
                 <input
-                  className="flex-1 h-full bg-transparent px-3 text-sm text-slate-700 outline-none"
+                  className="min-w-0 flex-1 h-full bg-transparent px-3 text-sm text-slate-700 outline-none"
                   onChange={(e) => setSearchValue(e.target.value)}
+                  onKeyDown={handleSearchKeyDown}
                   type="text"
-                  placeholder="Search sarees, fabrics, designs & offers"
+                  value={searchValue}
+                  placeholder={
+                    category
+                      ? `Search in ${category}`
+                      : "Please select category first"
+                  }
                 />
                 <button
                   onClick={search}
-                  className="h-full px-6 md:px-4 bg-[#f97316] text-white text-sm font-semibold uppercase"
+                  className="h-full shrink-0 px-6 md:px-4 bg-[#f97316] text-white text-sm font-semibold uppercase"
                 >
                   Search
                 </button>

@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Headers from "../components/Headers";
 import Footer from "../components/Footer";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight, FiX } from "react-icons/fi";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import { useDispatch, useSelector } from "react-redux";
@@ -38,6 +38,7 @@ const Details = () => {
   const [activeTab, setActiveTab] = useState("description");
   const [quantity, setQuantity] = useState(1);
   const [imageIndex, setImageIndex] = useState(0);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [gallerySwiper, setGallerySwiper] = useState(null);
   const [loadedImages, setLoadedImages] = useState({});
   const thumbnailRefs = useRef([]);
@@ -73,6 +74,7 @@ const Details = () => {
   useEffect(() => {
     setQuantity(1);
     setImageIndex(0);
+    setPreviewOpen(false);
     setLoadedImages({});
   }, [product._id]);
 
@@ -87,13 +89,19 @@ const Details = () => {
     }
   }, [dispatch, errorMessage, successMessage]);
 
-  const syncImage = (nextIndex) => {
+  const syncImage = useCallback((nextIndex) => {
     if (!images.length) return;
     const normalizedIndex = (nextIndex + images.length) % images.length;
     setImageIndex(normalizedIndex);
     if (gallerySwiper) {
       gallerySwiper.slideTo(normalizedIndex);
     }
+  }, [gallerySwiper, images.length]);
+
+  const openImagePreview = (index) => {
+    if (!images.length) return;
+    syncImage(index);
+    setPreviewOpen(true);
   };
 
   useEffect(() => {
@@ -106,6 +114,33 @@ const Details = () => {
       });
     }
   }, [imageIndex]);
+
+  useEffect(() => {
+    if (!previewOpen) return undefined;
+
+    const originalOverflow = document.body.style.overflow;
+    const handlePreviewKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setPreviewOpen(false);
+      }
+
+      if (event.key === "ArrowLeft") {
+        syncImage(imageIndex - 1);
+      }
+
+      if (event.key === "ArrowRight") {
+        syncImage(imageIndex + 1);
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", handlePreviewKeyDown);
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.removeEventListener("keydown", handlePreviewKeyDown);
+    };
+  }, [imageIndex, previewOpen, syncImage]);
 
   const handleImageLoad = (imageKey) => {
     setLoadedImages((prev) => ({
@@ -287,16 +322,24 @@ const Details = () => {
                             {!loadedImages[imageKey] && (
                               <div className="absolute inset-0 skeleton rounded-[8px]" />
                             )}
-                            <ProductImage
-                              alt={product.name || "Product"}
-                              className="w-full rounded-[8px]"
-                              imgClassName={`p-5 transition-opacity duration-200 sm:p-4 ${
-                                loadedImages[imageKey] ? "opacity-100" : "opacity-0"
-                              }`}
-                              loading={index === 0 ? "eager" : "lazy"}
-                              onLoad={() => handleImageLoad(imageKey)}
-                              src={image}
-                            />
+                            <button
+                              aria-label={`Open image ${index + 1} preview`}
+                              className="block w-full cursor-zoom-in text-left disabled:cursor-default"
+                              disabled={!image}
+                              onClick={() => openImagePreview(index)}
+                              type="button"
+                            >
+                              <ProductImage
+                                alt={product.name || "Product"}
+                                className="w-full rounded-[8px]"
+                                imgClassName={`p-5 transition-opacity duration-200 sm:p-4 ${
+                                  loadedImages[imageKey] ? "opacity-100" : "opacity-0"
+                                }`}
+                                loading={index === 0 ? "eager" : "lazy"}
+                                onLoad={() => handleImageLoad(imageKey)}
+                                src={image}
+                              />
+                            </button>
                           </div>
                         </SwiperSlide>
                       );
@@ -608,6 +651,94 @@ const Details = () => {
           </div>
         )}
       </section>
+
+      {previewOpen && images.length > 0 && (
+        <div
+          aria-label="Product image preview"
+          aria-modal="true"
+          className="fixed inset-0 z-[100000] bg-black/80 px-5 py-5 sm:px-3 sm:py-3"
+          onClick={() => setPreviewOpen(false)}
+          role="dialog"
+        >
+          <div
+            className="relative mx-auto flex h-full max-w-[1100px] flex-col"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex justify-end pb-3">
+              <button
+                aria-label="Close image preview"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-700 shadow-lg hover:text-[var(--mh-primary)]"
+                onClick={() => setPreviewOpen(false)}
+                type="button"
+              >
+                <FiX size={22} />
+              </button>
+            </div>
+
+            <div className="relative min-h-0 flex-1">
+              <div className="flex h-full items-center justify-center rounded-[8px] bg-white p-3 shadow-2xl sm:p-2">
+                <ProductImage
+                  alt={`${product.name || "Product"} preview`}
+                  aspectRatio={null}
+                  backgroundClassName="bg-white"
+                  className="h-[72vh] max-h-[720px] w-full rounded-[8px] md-lg:h-[62vh] sm:h-[55vh]"
+                  imgClassName="p-2 sm:p-1"
+                  loading="eager"
+                  src={images[imageIndex] || images[0]}
+                />
+              </div>
+
+              {images.length > 1 && (
+                <>
+                  <button
+                    aria-label="Previous preview image"
+                    className="absolute left-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-700 shadow-md hover:text-[var(--mh-primary)] sm:left-2 sm:h-9 sm:w-9"
+                    onClick={() => syncImage(imageIndex - 1)}
+                    type="button"
+                  >
+                    <FiChevronLeft size={20} />
+                  </button>
+                  <button
+                    aria-label="Next preview image"
+                    className="absolute right-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-700 shadow-md hover:text-[var(--mh-primary)] sm:right-2 sm:h-9 sm:w-9"
+                    onClick={() => syncImage(imageIndex + 1)}
+                    type="button"
+                  >
+                    <FiChevronRight size={20} />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {images.length > 1 && (
+              <div className="mt-4 flex justify-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                {images.map((image, index) => (
+                  <button
+                    key={`${image}-${index}-preview-thumb`}
+                    aria-label={`Preview image ${index + 1}`}
+                    className={`h-[70px] w-[70px] flex-shrink-0 overflow-hidden rounded-[6px] bg-white ${
+                      imageIndex === index
+                        ? "border-2 border-[var(--mh-primary)]"
+                        : "border border-white/60 hover:border-[#ffd1b0]"
+                    } sm:h-[58px] sm:w-[58px]`}
+                    onClick={() => syncImage(index)}
+                    type="button"
+                  >
+                    <ProductImage
+                      alt={`${product.name || "Product"} ${index + 1}`}
+                      backgroundClassName="bg-white"
+                      className="h-full w-full"
+                      imgClassName="p-1"
+                      loading="lazy"
+                      src={image}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

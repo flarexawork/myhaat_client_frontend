@@ -89,6 +89,7 @@ const Shipping = () => {
   }, [products, initialShippingFee]);
 
   const [fieldError, setFieldError] = useState("");
+  const [orderError, setOrderError] = useState("");
 
   const save = (e) => {
     e.preventDefault();
@@ -124,6 +125,7 @@ const Shipping = () => {
       return;
     }
 
+    setOrderError("");
     const res = await dispatch(
       place_order({
         price,
@@ -136,7 +138,10 @@ const Shipping = () => {
       }),
     );
 
-    if (!res.payload) return;
+    if (res.type?.endsWith("/rejected") || !res.payload) {
+      setOrderError(res.payload?.message || res.payload?.error || res.error?.message || "We could not place the order. Please try again.");
+      return;
+    }
 
     if (paymentType === "cod") {
       navigate(`/order/success/${res.payload.orderId}`);
@@ -385,6 +390,12 @@ const Shipping = () => {
                 >
                   Place Order
                 </button>
+
+                {orderError ? (
+                  <div className="mt-3 rounded-lg border border-[#ffd6bf] bg-[#fff8f2] px-3 py-2 text-sm text-[#c2550a]">
+                    {orderError}
+                  </div>
+                ) : null}
 
                 <p className="mt-3 text-xs leading-5 text-slate-400">
                   Your payment flow and order logic remain unchanged. You can place

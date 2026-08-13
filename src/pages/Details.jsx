@@ -21,6 +21,18 @@ import {
 } from "../store/reducers/cardReducer";
 import toast from "react-hot-toast";
 import { fetchShippingFee } from "../utils/shippingFee";
+import api from "../api/api";
+
+const makeVariantKey = (attributes = []) =>
+  [...attributes]
+    .map((item) => ({
+      name: String(item.name || "").trim(),
+      value: String(item.value || "").trim(),
+    }))
+    .filter((item) => item.name && item.value)
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((item) => `${item.name}:${item.value}`)
+    .join("|");
 
 const Details = () => {
   const navigate = useNavigate();
@@ -41,15 +53,31 @@ const Details = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [gallerySwiper, setGallerySwiper] = useState(null);
   const [loadedImages, setLoadedImages] = useState({});
+  const [selectedAttributes, setSelectedAttributes] = useState({});
+  const [pincode, setPincode] = useState("");
+  const [pincodeResult, setPincodeResult] = useState(null);
+  const [pincodeLoading, setPincodeLoading] = useState(false);
   const thumbnailRefs = useRef([]);
 
   const images = product.images || [];
   const galleryImages = images.length ? images : [null];
   const discount = Number(product.discount) || 0;
+  const productVariations = product.variations || [];
+  const selectedVariantKey = makeVariantKey(
+    Object.entries(selectedAttributes).map(([name, value]) => ({
+      name,
+      value,
+    })),
+  );
+  const selectedVariant = (product.variantCombinations || []).find(
+    (item) => item.isActive !== false && item.variantKey === selectedVariantKey,
+  );
+  const effectiveStock = selectedVariant?.stock ?? product.stock;
+  const effectiveBasePrice = selectedVariant?.price || product.price || 0;
   const finalPrice =
     discount > 0
-      ? product.price - Math.floor((product.price * discount) / 100)
-      : product.price || 0;
+      ? effectiveBasePrice - Math.floor((effectiveBasePrice * discount) / 100)
+      : effectiveBasePrice;
   const shareImage = galleryImages[imageIndex] || galleryImages[0] || "";
 
   const metaRows = [
@@ -76,6 +104,9 @@ const Details = () => {
     setImageIndex(0);
     setPreviewOpen(false);
     setLoadedImages({});
+    setSelectedAttributes({});
+    setPincode("");
+    setPincodeResult(null);
   }, [product._id]);
 
   useEffect(() => {
@@ -89,14 +120,17 @@ const Details = () => {
     }
   }, [dispatch, errorMessage, successMessage]);
 
-  const syncImage = useCallback((nextIndex) => {
-    if (!images.length) return;
-    const normalizedIndex = (nextIndex + images.length) % images.length;
-    setImageIndex(normalizedIndex);
-    if (gallerySwiper) {
-      gallerySwiper.slideTo(normalizedIndex);
-    }
-  }, [gallerySwiper, images.length]);
+  const syncImage = useCallback(
+    (nextIndex) => {
+      if (!images.length) return;
+      const normalizedIndex = (nextIndex + images.length) % images.length;
+      setImageIndex(normalizedIndex);
+      if (gallerySwiper) {
+        gallerySwiper.slideTo(normalizedIndex);
+      }
+    },
+    [gallerySwiper, images.length],
+  );
 
   const openImagePreview = (index) => {
     if (!images.length) return;
@@ -150,7 +184,7 @@ const Details = () => {
   };
 
   const inc = () => {
-    if (quantity >= product.stock) {
+    if (quantity >= effectiveStock) {
       toast.error("Out of stock");
       return;
     }
@@ -163,17 +197,47 @@ const Details = () => {
     }
   };
 
+  const getSelectedVariationForSubmit = () => {
+    if (!productVariations.length) return null;
+
+    const missing = productVariations.find(
+      (variation) =>
+        variation.required !== false && !selectedAttributes[variation.name],
+    );
+
+    if (missing) {
+      toast.error(`Please select ${missing.label || missing.name}`);
+      return false;
+    }
+
+    if (!selectedVariant) {
+      toast.error("Please select an available variation combination");
+      return false;
+    }
+
+    return {
+      variantKey: selectedVariant.variantKey,
+      sku: selectedVariant.sku || "",
+      attributes: selectedVariant.attributes || [],
+    };
+  };
+
   const addCard = (productId = product._id, selectedQuantity = quantity) => {
     if (!userInfo) {
       navigate("/login");
       return;
     }
 
+    const selectedVariation =
+      productId === product._id ? getSelectedVariationForSubmit() : null;
+    if (selectedVariation === false) return;
+
     dispatch(
       add_to_card({
         userId: userInfo.id,
         quantity: selectedQuantity,
         productId,
+        selectedVariation,
       }),
     );
   };
@@ -206,10 +270,13 @@ const Details = () => {
 
     const computedPrice =
       discount > 0
-        ? product.price - Math.floor((product.price * product.discount) / 100)
-        : product.price;
+        ? effectiveBasePrice -
+          Math.floor((effectiveBasePrice * product.discount) / 100)
+        : effectiveBasePrice;
 
     const shippingFee = await fetchShippingFee(1);
+    const selectedVariation = getSelectedVariationForSubmit();
+    if (selectedVariation === false) return;
 
     navigate("/shipping", {
       state: {
@@ -221,7 +288,12 @@ const Details = () => {
             products: [
               {
                 quantity,
-                productInfo: product,
+                selectedVariation,
+                productInfo: {
+                  ...product,
+                  price: effectiveBasePrice,
+                  selectedVariation,
+                },
               },
             ],
           },
@@ -231,6 +303,40 @@ const Details = () => {
         items: 1,
       },
     });
+  };
+
+  const selectVariationOption = (variation, option) => {
+    setSelectedAttributes((current) => ({
+      ...current,
+      [variation.name]: option.value,
+    }));
+  };
+
+  const checkPincode = async () => {
+    if (!/^\d{6}$/.test(pincode.trim())) {
+      setPincodeResult({
+        available: false,
+        message: "Please enter a valid 6-digit pincode.",
+      });
+      return;
+    }
+
+    setPincodeLoading(true);
+    try {
+      const { data } = await api.get(
+        `/home/product/${product._id}/check-pincode/${pincode.trim()}`,
+      );
+      setPincodeResult(data);
+    } catch (error) {
+      setPincodeResult(
+        error.response?.data || {
+          available: false,
+          message: "Unable to check pincode.",
+        },
+      );
+    } finally {
+      setPincodeLoading(false);
+    }
   };
 
   if (productLoading && !product?._id) {
@@ -333,7 +439,9 @@ const Details = () => {
                                 alt={product.name || "Product"}
                                 className="w-full rounded-[8px]"
                                 imgClassName={`p-5 transition-opacity duration-200 sm:p-4 ${
-                                  loadedImages[imageKey] ? "opacity-100" : "opacity-0"
+                                  loadedImages[imageKey]
+                                    ? "opacity-100"
+                                    : "opacity-0"
                                 }`}
                                 loading={index === 0 ? "eager" : "lazy"}
                                 onLoad={() => handleImageLoad(imageKey)}
@@ -445,8 +553,84 @@ const Details = () => {
               )}
             </div>
 
-            <div className="mt-3 text-sm font-medium text-green-600">
-              {product.stock ? `In Stock (${product.stock})` : "Out of Stock"}
+            <div
+              className={`mt-3 text-sm font-medium ${
+                effectiveStock ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {effectiveStock ? `In Stock (${effectiveStock})` : "Out of Stock"}
+            </div>
+
+            {productVariations.length > 0 && (
+              <div className="mt-5 space-y-4">
+                {productVariations.map((variation) => (
+                  <div key={variation.name}>
+                    <p className="mb-2 text-sm font-medium text-[var(--mh-ink)]">
+                      {variation.label || variation.name}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {(variation.selectedOptions || []).map((option) => {
+                        const active =
+                          selectedAttributes[variation.name] === option.value;
+                        return (
+                          <button
+                            key={`${variation.name}-${option.value}`}
+                            type="button"
+                            onClick={() =>
+                              selectVariationOption(variation, option)
+                            }
+                            className={`rounded-md border px-3 py-2 text-sm ${
+                              active
+                                ? "border-[var(--mh-primary)] bg-[#fff1e8] text-[var(--mh-primary)]"
+                                : "border-[var(--mh-border)] bg-white text-slate-700 hover:border-[#ffd1b0]"
+                            }`}
+                          >
+                            {option.group ? `${option.group} - ` : ""}
+                            {option.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-5 rounded-[8px] border border-[var(--mh-border)] bg-white p-4">
+              <label
+                className="mb-2 block text-sm font-medium text-[var(--mh-ink)]"
+                htmlFor="delivery-pincode"
+              >
+                Deliver to
+              </label>
+              <div className="flex gap-2 sm:flex-col">
+                <input
+                  id="delivery-pincode"
+                  className="h-[42px] min-w-0 flex-1 rounded-md border border-[var(--mh-border)] px-3 text-sm outline-none focus:border-[var(--mh-primary)]"
+                  value={pincode}
+                  onChange={(e) => setPincode(e.target.value)}
+                  placeholder="Enter pincode"
+                  maxLength={6}
+                />
+                <button
+                  className="h-[42px] rounded-md bg-[var(--mh-ink)] px-4 text-sm font-semibold text-white disabled:opacity-60"
+                  type="button"
+                  disabled={pincodeLoading}
+                  onClick={checkPincode}
+                >
+                  {pincodeLoading ? "Checking..." : "Check"}
+                </button>
+              </div>
+              {pincodeResult && (
+                <p
+                  className={`mt-2 text-sm ${pincodeResult.available ? "text-green-600" : "text-red-600"}`}
+                >
+                  {pincodeResult.available
+                    ? "Delivery available"
+                    : pincodeResult.message ||
+                      "Delivery not available to this pincode."}
+                </p>
+              )}
             </div>
 
             <div className="mt-5 flex flex-wrap items-center gap-3 sm:flex-col sm:items-stretch">
@@ -474,7 +658,7 @@ const Details = () => {
 
               <button
                 className="flex h-[42px] items-center justify-center rounded-md bg-[var(--mh-primary)] px-5 text-sm font-semibold text-white hover:bg-[var(--mh-primary-dark)] disabled:opacity-70 sm:w-full"
-                disabled={!product.stock || cartUpdating}
+                disabled={!effectiveStock || cartUpdating}
                 onClick={() => addCard()}
                 type="button"
               >
@@ -483,7 +667,7 @@ const Details = () => {
 
               <button
                 className="flex h-[42px] items-center justify-center rounded-md border border-[var(--mh-ink)] px-5 text-sm font-semibold text-[var(--mh-ink)] hover:bg-[var(--mh-ink)] hover:text-white disabled:opacity-60 sm:w-full"
-                disabled={!product.stock}
+                disabled={!effectiveStock}
                 onClick={buy}
                 type="button"
               >

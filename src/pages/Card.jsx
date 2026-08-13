@@ -126,6 +126,10 @@ const Card = () => {
 
                     <div className="space-y-4">
                       {shop.products.map((item) => {
+                        const selectedVariant = (item.productInfo.variantCombinations || []).find(
+                          (variant) => variant.variantKey === item.variantKey,
+                        );
+                        const effectiveStock = selectedVariant?.stock ?? item.productInfo.stock;
                         const finalPrice =
                           item.productInfo.price -
                           Math.floor(
@@ -152,6 +156,13 @@ const Card = () => {
                               <p className="mt-1 text-sm text-slate-500">
                                 Brand: {item.productInfo.brand || "MyHaat"}
                               </p>
+                              {item.selectedVariation?.attributes?.length > 0 && (
+                                <p className="mt-1 text-sm text-slate-500">
+                                  {item.selectedVariation.attributes
+                                    .map((attribute) => `${attribute.label || attribute.name}: ${attribute.optionLabel || attribute.value}`)
+                                    .join(" / ")}
+                                </p>
+                              )}
                               <div className="mt-3 flex flex-wrap items-end gap-3">
                                 <span className="text-xl font-bold text-[var(--mh-primary)]">
                                   ₹{finalPrice}
@@ -180,7 +191,7 @@ const Card = () => {
                                 <button
                                   className="px-3 text-lg font-semibold text-slate-700 hover:text-[var(--mh-primary)]"
                                   onClick={() =>
-                                    inc(item.quantity, item.productInfo.stock, item._id)
+                                    inc(item.quantity, effectiveStock, item._id)
                                   }
                                   type="button"
                                 >
@@ -239,6 +250,13 @@ const Card = () => {
                               <p className="mt-1 text-sm text-slate-500">
                                 Brand: {product.brand || "MyHaat"}
                               </p>
+                              {item.selectedVariation?.attributes?.length > 0 && (
+                                <p className="mt-1 text-sm text-slate-500">
+                                  {item.selectedVariation.attributes
+                                    .map((attribute) => `${attribute.label || attribute.name}: ${attribute.optionLabel || attribute.value}`)
+                                    .join(" / ")}
+                                </p>
+                              )}
                               <p className="mt-3 text-lg font-bold text-[var(--mh-primary)]">
                                 ₹{finalPrice}
                               </p>

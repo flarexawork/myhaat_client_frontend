@@ -6,10 +6,13 @@ import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import AuthShell from "../components/auth/AuthShell";
 import {
+  clearOtpChallenge,
   customer_login,
   messageClear,
   resend_verification,
   setPendingEmail,
+  retry_login_otp,
+  verify_login_otp,
 } from "../store/reducers/authReducer";
 
 const Login = () => {
@@ -22,6 +25,9 @@ const Login = () => {
     userInfo,
     verificationRequired,
     pendingEmail,
+    otpRequired,
+    otpMaskedIdentifier,
+    otpResendCooldownSeconds,
   } = useSelector((state) => state.auth);
 
   const [state, setState] = useState({
@@ -29,6 +35,9 @@ const Login = () => {
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [otpError, setOtpError] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
   const sellerLoginUrl = "https://seller.myhaat24.com/login";
 
   const inputHandle = (e) => {
@@ -44,6 +53,30 @@ const Login = () => {
     dispatch(customer_login(state));
   };
 
+  const verifyOtp = (e) => {
+    e.preventDefault();
+    const normalizedOtp = otp.replace(/\D/g, "");
+
+    if (!normalizedOtp) {
+      setOtpError("Enter the OTP to continue");
+      return;
+    }
+
+    setOtpError("");
+    dispatch(verify_login_otp({ otp: normalizedOtp }));
+  };
+
+  const resendOtp = () => {
+    if (resendCooldown > 0) return;
+    dispatch(retry_login_otp());
+  };
+
+  const changeCredentials = () => {
+    setOtp("");
+    setOtpError("");
+    dispatch(clearOtpChallenge());
+  };
+
   const resendVerificationEmail = () => {
     if (!state.email) {
       toast.error("Enter your email first");
@@ -51,6 +84,19 @@ const Login = () => {
     }
     dispatch(resend_verification({ email: state.email }));
   };
+
+  useEffect(() => {
+    setResendCooldown(otpResendCooldownSeconds || 0);
+  }, [otpResendCooldownSeconds]);
+
+  useEffect(() => {
+    if (!resendCooldown) return undefined;
+    const timer = setInterval(() => {
+      setResendCooldown((current) => (current > 0 ? current - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   useEffect(() => {
     if (successMessage) {
@@ -86,6 +132,7 @@ const Login = () => {
           </>
         }
       >
+        {!otpRequired ? (
         <form onSubmit={login} className="space-y-4 text-slate-600">
           <div>
             <label
@@ -153,6 +200,69 @@ const Login = () => {
             Become Seller
           </a>
         </form>
+        ) : (
+          <form onSubmit={verifyOtp} className="space-y-4 text-slate-600">
+            <div className="rounded-lg border border-[#E6E1DA] bg-[#fffaf6] px-4 py-3 text-sm text-slate-600">
+              OTP sent to{" "}
+              <span className="font-medium text-[#0F1C2E]">
+                {otpMaskedIdentifier || "your registered contact"}
+              </span>
+            </div>
+
+            <div>
+              <label
+                className="mb-2 block text-sm font-medium text-[#0F1C2E]"
+                htmlFor="loginOtp"
+              >
+                OTP
+              </label>
+              <input
+                id="loginOtp"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={8}
+                onChange={(e) => {
+                  setOtp(e.target.value.replace(/\D/g, ""));
+                  setOtpError("");
+                }}
+                placeholder="Enter OTP"
+                type="text"
+                value={otp}
+                className="h-11 w-full rounded-lg border border-[#E6E1DA] px-3 text-sm outline-none transition-colors focus:border-[#FF7A1A]"
+              />
+            </div>
+
+            {otpError ? (
+              <div className="rounded-lg border border-[#ffd6bf] bg-[#fff8f2] px-3 py-2 text-sm text-[#c2550a]">
+                {otpError}
+              </div>
+            ) : null}
+
+            <button
+              className="h-11 w-full rounded-lg bg-[#FF7A1A] text-sm font-semibold text-white transition-colors hover:bg-[#e56f17] disabled:opacity-70"
+              disabled={loader}
+            >
+              {loader ? "Verifying..." : "Verify OTP"}
+            </button>
+
+            <button
+              type="button"
+              onClick={resendOtp}
+              disabled={loader || resendCooldown > 0}
+              className="h-11 w-full rounded-lg border border-[#E6E1DA] text-sm font-semibold text-[#0F1C2E] transition-colors hover:border-[#FF7A1A] hover:text-[#FF7A1A] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {resendCooldown > 0 ? `Resend OTP in ${resendCooldown}s` : "Resend OTP"}
+            </button>
+
+            <button
+              type="button"
+              onClick={changeCredentials}
+              className="w-full text-sm font-medium text-[#FF7A1A] hover:text-[#e56f17]"
+            >
+              Change login details
+            </button>
+          </form>
+        )}
 
         {verificationRequired ? (
           <div className="mt-5 rounded-lg border border-[#ffd6bf] bg-[#fff8f2] p-4 text-sm">

@@ -6,15 +6,25 @@ import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import AuthShell from "../components/auth/AuthShell";
 import {
+  clearSignupOtpChallenge,
   customer_register,
   messageClear,
-  setPendingEmail,
+  retry_signup_otp,
+  verify_signup_otp,
 } from "../store/reducers/authReducer";
 
 const Register = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { loader, successMessage, errorMessage, verificationRequired, pendingEmail } =
+  const {
+    loader,
+    successMessage,
+    errorMessage,
+    pendingEmail,
+    signupOtpRequired,
+    signupOtpMaskedIdentifier,
+    signupOtpResendCooldownSeconds,
+  } =
     useSelector((state) => state.auth);
 
   const [state, setState] = useState({
@@ -27,6 +37,9 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [fieldError, setFieldError] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpError, setOtpError] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   const inputHandle = (e) => {
     setState({
@@ -54,30 +67,59 @@ const Register = () => {
     }
 
     setFieldError("");
-    dispatch(setPendingEmail(state.email));
     dispatch(customer_register(state));
   };
+
+  const verifyOtp = (e) => {
+    e.preventDefault();
+    const normalizedOtp = otp.replace(/\D/g, "");
+
+    if (!normalizedOtp) {
+      setOtpError("Enter the OTP to continue");
+      return;
+    }
+
+    setOtpError("");
+    dispatch(verify_signup_otp({ otp: normalizedOtp }));
+  };
+
+  const resendOtp = () => {
+    if (resendCooldown > 0) return;
+    dispatch(retry_signup_otp());
+  };
+
+  const changeDetails = () => {
+    setOtp("");
+    setOtpError("");
+    dispatch(clearSignupOtpChallenge());
+  };
+
+  useEffect(() => {
+    setResendCooldown(signupOtpResendCooldownSeconds || 0);
+  }, [signupOtpResendCooldownSeconds]);
+
+  useEffect(() => {
+    if (!resendCooldown) return undefined;
+    const timer = setInterval(() => {
+      setResendCooldown((current) => (current > 0 ? current - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   useEffect(() => {
     if (successMessage) {
       toast.success(successMessage);
       dispatch(messageClear());
+      if (!signupOtpRequired) {
+        navigate("/login");
+      }
     }
     if (errorMessage) {
       toast.error(errorMessage);
       dispatch(messageClear());
     }
-  }, [dispatch, errorMessage, successMessage]);
-
-  useEffect(() => {
-    if (verificationRequired) {
-      navigate("/verify-pending", {
-        state: {
-          email: state.email,
-        },
-      });
-    }
-  }, [navigate, state.email, verificationRequired]);
+  }, [dispatch, errorMessage, navigate, signupOtpRequired, successMessage]);
 
   return (
     <>
@@ -99,6 +141,7 @@ const Register = () => {
           </>
         }
       >
+        {!signupOtpRequired ? (
         <form onSubmit={register} className="space-y-4 text-slate-600">
           <div>
             <label className="mb-2 block text-sm font-medium text-[#0F1C2E]" htmlFor="name">
@@ -215,6 +258,67 @@ const Register = () => {
             Create Account
           </button>
         </form>
+        ) : (
+          <form onSubmit={verifyOtp} className="space-y-4 text-slate-600">
+            <div className="rounded-lg border border-[#E6E1DA] bg-[#fffaf6] px-4 py-3 text-sm text-slate-600">
+              OTP sent to{" "}
+              <span className="font-medium text-[#0F1C2E]">
+                {signupOtpMaskedIdentifier || "your mobile number"}
+              </span>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-[#0F1C2E]" htmlFor="signupOtp">
+                OTP
+              </label>
+              <input
+                id="signupOtp"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={8}
+                onChange={(e) => {
+                  setOtp(e.target.value.replace(/\D/g, ""));
+                  setOtpError("");
+                }}
+                placeholder="Enter OTP"
+                type="text"
+                value={otp}
+                className="h-11 w-full rounded-lg border border-[#E6E1DA] px-3 text-sm outline-none transition-colors focus:border-[#FF7A1A]"
+                required
+              />
+            </div>
+
+            {otpError ? (
+              <div className="rounded-lg border border-[#ffd6bf] bg-[#fff8f2] px-3 py-2 text-sm text-[#c2550a]">
+                {otpError}
+              </div>
+            ) : null}
+
+            <button
+              className="h-11 w-full rounded-lg bg-[#FF7A1A] text-sm font-semibold text-white transition-colors hover:bg-[#e56f17] disabled:opacity-70"
+              disabled={loader}
+            >
+              {loader ? "Verifying..." : "Verify & Create Account"}
+            </button>
+
+            <button
+              type="button"
+              onClick={resendOtp}
+              disabled={loader || resendCooldown > 0}
+              className="h-11 w-full rounded-lg border border-[#E6E1DA] text-sm font-semibold text-[#0F1C2E] transition-colors hover:border-[#FF7A1A] hover:text-[#FF7A1A] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {resendCooldown > 0 ? `Resend OTP in ${resendCooldown}s` : "Resend OTP"}
+            </button>
+
+            <button
+              type="button"
+              onClick={changeDetails}
+              className="w-full text-sm font-medium text-[#FF7A1A] hover:text-[#e56f17]"
+            >
+              Change signup details
+            </button>
+          </form>
+        )}
       </AuthShell>
     </>
   );

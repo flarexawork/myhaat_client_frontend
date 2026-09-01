@@ -21,7 +21,7 @@ const Home = () => {
                 <Categorys />
             </div>
             <div className='py-[45px] max-w-[1440px] mx-auto px-16 sm:px-5 md-lg:px-12 md:px-10'>
-                <FeatureProducts products={products} loading={productsLoading} />
+                <FeatureProducts products={products} loading={productsLoading} infinite />
             </div>
             <section className='py-12 bg-gradient-to-b from-[#fff9f4] to-white border-y border-[#f3e3d8]'>
                 <div className='max-w-[1440px] mx-auto px-16 sm:px-5 md-lg:px-12 md:px-10'>

@@ -41,6 +41,23 @@ export const get_products = createAsyncThunk(
     }
 )
 
+export const get_featured_products = createAsyncThunk(
+    'product/get_featured_products',
+    async ({ page = 1, limit = 16 }, {
+        fulfillWithValue,
+        rejectWithValue
+    }) => {
+        try {
+            const {
+                data
+            } = await api.get(`/home/get-featured-products?page=${page}&&limit=${limit}`)
+            return fulfillWithValue(data)
+        } catch (error) {
+            return rejectWithValue(error.response?.data || error.response)
+        }
+    }
+)
+
 export const get_product = createAsyncThunk(
     'product/get_product',
     async (slug, {
@@ -169,6 +186,11 @@ export const homeReducer = createSlice({
         product: {},
         relatedProducts: [],
         moreProducts: [],
+        featuredProducts: [],
+        featuredPage: 0,
+        featuredTotalProduct: 0,
+        featuredHasMore: true,
+        featuredLoading: false,
         successMessage: '',
         errorMessage: '',
         totalReview: 0,
@@ -256,6 +278,27 @@ export const homeReducer = createSlice({
             payload
         }) => {
             state.banners = payload.banners
+        },
+        [get_featured_products.pending]: (state, _) => {
+            state.featuredLoading = true
+        },
+        [get_featured_products.fulfilled]: (state, {
+            payload
+        }) => {
+            state.featuredLoading = false
+            state.featuredPage = payload.page
+            state.featuredHasMore = payload.hasMore
+            state.featuredTotalProduct = payload.totalProduct
+            state.featuredProducts = payload.page === 1
+                ? payload.products
+                : [
+                    ...state.featuredProducts,
+                    ...payload.products.filter((product) => !state.featuredProducts.some((item) => item._id === product._id))
+                ]
+        },
+        [get_featured_products.rejected]: (state, _) => {
+            state.featuredLoading = false
+            state.featuredHasMore = false
         },
 
     }

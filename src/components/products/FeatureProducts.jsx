@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { AiFillHeart, AiOutlineHeart, AiOutlineShoppingCart } from "react-icons/ai";
 import { FaEye } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,16 +13,32 @@ import {
   messageClear,
   add_to_wishlist,
 } from "../../store/reducers/cardReducer";
+import { get_featured_products } from "../../store/reducers/homeReducer";
 
-const FeatureProducts = ({ products, loading = false }) => {
+const FEATURED_PAGE_LIMIT = 16;
+
+const FeatureProducts = ({ products, loading = false, infinite = false }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const loadMoreRef = useRef(null);
 
   const { userInfo } = useSelector((state) => state.auth);
   const { successMessage, errorMessage, wishlist } = useSelector(
     (state) => state.card,
   );
+  const {
+    featuredProducts,
+    featuredPage,
+    featuredTotalProduct,
+    featuredHasMore,
+    featuredLoading,
+  } = useSelector((state) => state.home);
   const userId = userInfo?.id;
+  const visibleProducts = useMemo(
+    () => (infinite ? featuredProducts : products),
+    [featuredProducts, infinite, products],
+  );
+  const initialLoading = infinite ? featuredLoading && !visibleProducts.length : loading;
 
   const add_card = (id) => {
     if (userInfo) {
@@ -78,6 +94,52 @@ const FeatureProducts = ({ products, loading = false }) => {
     navigate(`/product/details/${slug}`);
   };
 
+  useEffect(() => {
+    if (!infinite || featuredPage > 0 || featuredLoading) return;
+
+    dispatch(
+      get_featured_products({
+        page: 1,
+        limit: FEATURED_PAGE_LIMIT,
+      }),
+    );
+  }, [dispatch, featuredLoading, featuredPage, infinite]);
+
+  const loadNextFeaturedPage = useCallback(() => {
+    if (!infinite || featuredLoading || !featuredHasMore) return;
+
+    dispatch(
+      get_featured_products({
+        page: Math.max(featuredPage, 0) + 1,
+        limit: FEATURED_PAGE_LIMIT,
+      }),
+    );
+  }, [dispatch, featuredHasMore, featuredLoading, featuredPage, infinite]);
+
+  useEffect(() => {
+    if (!infinite || featuredPage === 0) return undefined;
+
+    const target = loadMoreRef.current;
+    if (!target) return undefined;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          loadNextFeaturedPage();
+        }
+      },
+      {
+        root: null,
+        rootMargin: "500px 0px",
+        threshold: 0,
+      },
+    );
+
+    observer.observe(target);
+
+    return () => observer.disconnect();
+  }, [featuredPage, infinite, loadNextFeaturedPage]);
+
   const isWishlisted = (product) =>
     wishlist.some((w) => {
       const wishlistProductId =
@@ -92,17 +154,22 @@ const FeatureProducts = ({ products, loading = false }) => {
           Featured
         </span>
         <h2 className="mt-3 text-3xl font-bold text-slate-800 md:text-2xl">
-          Featured Sarees Collection
+          Featured Products Collection
         </h2>
+        {infinite && featuredTotalProduct > 0 && (
+          <p className="mt-2 text-sm text-slate-500">
+            Showing {visibleProducts.length} of {featuredTotalProduct} products
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-4 gap-6 md-lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
-        {loading &&
+        {initialLoading &&
           Array.from({ length: 8 }).map((_, index) => (
             <ProductCardSkeleton key={index} />
           ))}
 
-        {!loading && products.map((p, i) => {
+        {!initialLoading && visibleProducts.map((p) => {
           const discount = Number(p.discount) || 0;
           const discountedPrice =
             discount > 0
@@ -115,7 +182,7 @@ const FeatureProducts = ({ products, loading = false }) => {
 
           return (
             <article
-              key={i}
+              key={p._id}
               onClick={() => openDetails(p.slug)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
@@ -263,6 +330,28 @@ const FeatureProducts = ({ products, loading = false }) => {
           );
         })}
       </div>
+
+      {infinite && (
+        <div ref={loadMoreRef} className="mt-8 flex min-h-[80px] items-center justify-center">
+          {featuredLoading ? (
+            <div className="grid w-full grid-cols-4 gap-6 md-lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <ProductCardSkeleton key={`featured-more-${index}`} />
+              ))}
+            </div>
+          ) : featuredHasMore ? (
+            <button
+              className="rounded-xl border border-[#f8c9ad] bg-white px-5 py-3 text-sm font-semibold text-[#c2410c] shadow-sm hover:bg-[#fff1e8]"
+              onClick={loadNextFeaturedPage}
+              type="button"
+            >
+              Load More
+            </button>
+          ) : visibleProducts.length > 0 ? (
+            <p className="text-sm text-slate-500">All products loaded.</p>
+          ) : null}
+        </div>
+      )}
     </div>
   );
 };

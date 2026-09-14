@@ -34,6 +34,7 @@ const Login = () => {
     email: pendingEmail || "",
     password: "",
   });
+  const [loginMethod, setLoginMethod] = useState("password");
   const [showPassword, setShowPassword] = useState(false);
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState("");
@@ -49,8 +50,13 @@ const Login = () => {
 
   const login = (e) => {
     e.preventDefault();
-    dispatch(setPendingEmail(state.email));
-    dispatch(customer_login(state));
+    const identifier = state.email.trim();
+    dispatch(setPendingEmail(identifier.includes("@") ? identifier : ""));
+    dispatch(customer_login({
+      identifier,
+      loginMethod,
+      ...(loginMethod === "password" ? { password: state.password } : {}),
+    }));
   };
 
   const verifyOtp = (e) => {
@@ -132,6 +138,21 @@ const Login = () => {
           </>
         }
       >
+        <div className="mb-5 flex gap-2" role="group" aria-label="Login method">
+          {[["password", "Password login"], ["otp", "Mobile OTP login"]].map(([method, label]) => (
+            <button key={method} type="button" disabled={loader} aria-pressed={loginMethod === method}
+              onClick={() => {
+                changeCredentials();
+                dispatch(messageClear());
+                setLoginMethod(method);
+                setState({ email: "", password: "" });
+                setShowPassword(false);
+              }}
+              className={`flex-1 rounded-lg border px-3 py-3 text-sm font-semibold ${loginMethod === method ? "border-[#FF7A1A] bg-[#fffaf6] text-[#c2550a]" : "border-[#E6E1DA] text-slate-600"}`}>
+              {label}
+            </button>
+          ))}
+        </div>
         {!otpRequired ? (
         <form onSubmit={login} className="space-y-4 text-slate-600">
           <div>
@@ -139,20 +160,22 @@ const Login = () => {
               className="mb-2 block text-sm font-medium text-[#0F1C2E]"
               htmlFor="email"
             >
-              Email
+              {loginMethod === "otp" ? "Mobile number" : "Email or mobile number"}
             </label>
             <input
               id="email"
               name="email"
               onChange={inputHandle}
-              placeholder="Enter your email"
-              type="email"
+              placeholder={loginMethod === "otp" ? "Enter your registered mobile number" : "Enter email or mobile number"}
+              type={loginMethod === "otp" ? "tel" : "text"}
+              autoComplete="username"
+              required
               value={state.email}
               className="h-11 w-full rounded-lg border border-[#E6E1DA] px-3 text-sm outline-none transition-colors focus:border-[#FF7A1A]"
             />
           </div>
 
-          <div>
+          {loginMethod === "password" && <div>
             <div className="mb-2 flex items-center justify-between gap-3">
               <label
                 className="block text-sm font-medium text-[#0F1C2E]"
@@ -176,6 +199,7 @@ const Login = () => {
                 type={showPassword ? "text" : "password"}
                 value={state.password}
                 autoComplete="current-password"
+                required
                 className="h-11 w-full rounded-lg border border-[#E6E1DA] px-3 pr-10 text-sm outline-none transition-colors focus:border-[#FF7A1A]"
               />
               <button
@@ -187,10 +211,10 @@ const Login = () => {
                 {showPassword ? <FiEyeOff /> : <FiEye />}
               </button>
             </div>
-          </div>
+          </div>}
 
-          <button className="h-11 w-full rounded-lg bg-[#FF7A1A] text-sm font-semibold text-white transition-colors hover:bg-[#e56f17]">
-            Login
+          <button disabled={loader} className="h-11 w-full rounded-lg bg-[#FF7A1A] text-sm font-semibold text-white transition-colors hover:bg-[#e56f17]">
+            {loginMethod === "otp" ? "Send mobile OTP" : "Login"}
           </button>
 
           <a
@@ -264,7 +288,7 @@ const Login = () => {
           </form>
         )}
 
-        {verificationRequired ? (
+        {verificationRequired && loginMethod === "password" ? (
           <div className="mt-5 rounded-lg border border-[#ffd6bf] bg-[#fff8f2] p-4 text-sm">
             <p className="font-medium text-[#c2550a]">
               Please verify your email before logging in.

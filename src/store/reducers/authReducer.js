@@ -134,12 +134,13 @@ export const customer_register = createAsyncThunk(
 
 export const verify_signup_otp = createAsyncThunk(
   "auth/verify_signup_otp",
-  async ({ otp }, { rejectWithValue, fulfillWithValue, getState }) => {
+  async ({ otp, emailOtp }, { rejectWithValue, fulfillWithValue, getState }) => {
     try {
       const { signupOtpChallengeToken } = getState().auth;
       const { data } = await api.post("/auth/signup-otp/verify", {
         challengeToken: signupOtpChallengeToken,
         otp,
+        emailOtp,
         role: "customer",
       });
       if (data?.success === false) {
@@ -372,6 +373,7 @@ export const authReducer = createSlice({
     signupOtpRequired: false,
     signupOtpChallengeToken: "",
     signupOtpMaskedIdentifier: "",
+    signupOtpMaskedEmail: "",
     signupOtpResendCooldownSeconds: 0,
     emailVerificationStatus: "idle",
     emailVerificationMessage: "",
@@ -397,6 +399,7 @@ export const authReducer = createSlice({
       state.signupOtpRequired = false;
       state.signupOtpChallengeToken = "";
       state.signupOtpMaskedIdentifier = "";
+      state.signupOtpMaskedEmail = "";
       state.signupOtpResendCooldownSeconds = 0;
     },
     clearOtpChallenge: (state, _) => {
@@ -410,6 +413,7 @@ export const authReducer = createSlice({
       state.signupOtpRequired = false;
       state.signupOtpChallengeToken = "";
       state.signupOtpMaskedIdentifier = "";
+      state.signupOtpMaskedEmail = "";
       state.signupOtpResendCooldownSeconds = 0;
     },
     setPendingEmail: (state, { payload }) => {
@@ -463,12 +467,13 @@ export const authReducer = createSlice({
         state.signupOtpRequired = true;
         state.signupOtpChallengeToken = payload.challengeToken || "";
         state.signupOtpMaskedIdentifier = payload.maskedIdentifier || "";
+        state.signupOtpMaskedEmail = payload.maskedEmail || "";
         state.signupOtpResendCooldownSeconds = payload.resendCooldownSeconds || 0;
         return;
       }
       state.successMessage =
         payload.message ||
-        "Account created successfully. Please login to verify with OTP.";
+        "Account created successfully. Please login.";
       state.pendingEmail = payload.email || "";
       state.verificationRequired = false;
       state.token = "";
@@ -488,6 +493,7 @@ export const authReducer = createSlice({
       state.signupOtpRequired = false;
       state.signupOtpChallengeToken = "";
       state.signupOtpMaskedIdentifier = "";
+      state.signupOtpMaskedEmail = "";
       state.signupOtpResendCooldownSeconds = 0;
     },
     [retry_signup_otp.pending]: (state, _) => {

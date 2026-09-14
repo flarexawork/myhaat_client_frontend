@@ -23,6 +23,7 @@ const Register = () => {
     pendingEmail,
     signupOtpRequired,
     signupOtpMaskedIdentifier,
+    signupOtpMaskedEmail,
     signupOtpResendCooldownSeconds,
   } =
     useSelector((state) => state.auth);
@@ -37,6 +38,7 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [fieldError, setFieldError] = useState("");
+  const [emailOtp, setEmailOtp] = useState("");
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -56,8 +58,8 @@ const Register = () => {
       return;
     }
 
-    if (!/^\d{10,15}$/.test(state.phone.trim())) {
-      setFieldError("Phone number must be 10-15 digits");
+    if (!/^\d{10,13}$/.test(state.phone.trim())) {
+      setFieldError("Phone number must be 10-13 digits");
       return;
     }
 
@@ -74,22 +76,29 @@ const Register = () => {
     e.preventDefault();
     const normalizedOtp = otp.replace(/\D/g, "");
 
-    if (!normalizedOtp) {
-      setOtpError("Enter the OTP to continue");
+    if (!normalizedOtp || !/^\d{6}$/.test(emailOtp)) {
+      setOtpError("Enter the mobile OTP and the 6-digit email OTP to continue");
       return;
     }
 
     setOtpError("");
-    dispatch(verify_signup_otp({ otp: normalizedOtp }));
+    dispatch(verify_signup_otp({ otp: normalizedOtp, emailOtp }));
   };
 
   const resendOtp = () => {
     if (resendCooldown > 0) return;
-    dispatch(retry_signup_otp());
+    dispatch(retry_signup_otp()).then((action) => {
+      if (retry_signup_otp.fulfilled.match(action)) {
+        setOtp("");
+        setEmailOtp("");
+        setResendCooldown(action.payload.resendCooldownSeconds || 0);
+      }
+    });
   };
 
   const changeDetails = () => {
     setOtp("");
+    setEmailOtp("");
     setOtpError("");
     dispatch(clearSignupOtpChallenge());
   };
@@ -261,15 +270,24 @@ const Register = () => {
         ) : (
           <form onSubmit={verifyOtp} className="space-y-4 text-slate-600">
             <div className="rounded-lg border border-[#E6E1DA] bg-[#fffaf6] px-4 py-3 text-sm text-slate-600">
-              OTP sent to{" "}
+              Mobile OTP sent to{" "}
               <span className="font-medium text-[#0F1C2E]">
                 {signupOtpMaskedIdentifier || "your mobile number"}
               </span>
+              <p className="mt-2">Email OTP sent to {signupOtpMaskedEmail || state.email}. Enter both codes to verify your account.</p>
             </div>
 
             <div>
+              <label className="mb-2 block text-sm font-medium text-[#0F1C2E]" htmlFor="signupEmailOtp">Email OTP</label>
+              <input id="signupEmailOtp" inputMode="numeric" autoComplete="one-time-code"
+                maxLength={6} pattern="[0-9]{6}" required value={emailOtp}
+                onChange={(e) => { setEmailOtp(e.target.value.replace(/\D/g, "")); setOtpError(""); }}
+                placeholder="Enter 6-digit email OTP" type="text"
+                className="h-11 w-full rounded-lg border border-[#E6E1DA] px-3 text-sm outline-none focus:border-[#FF7A1A]" />
+            </div>
+            <div>
               <label className="mb-2 block text-sm font-medium text-[#0F1C2E]" htmlFor="signupOtp">
-                OTP
+                Mobile OTP
               </label>
               <input
                 id="signupOtp"
@@ -307,7 +325,7 @@ const Register = () => {
               disabled={loader || resendCooldown > 0}
               className="h-11 w-full rounded-lg border border-[#E6E1DA] text-sm font-semibold text-[#0F1C2E] transition-colors hover:border-[#FF7A1A] hover:text-[#FF7A1A] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {resendCooldown > 0 ? `Resend OTP in ${resendCooldown}s` : "Resend OTP"}
+              {resendCooldown > 0 ? `Resend codes in ${resendCooldown}s` : "Resend email and mobile OTPs"}
             </button>
 
             <button

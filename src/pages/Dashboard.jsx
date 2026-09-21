@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Headers from "../components/Headers";
 import Footer from "../components/Footer";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
@@ -17,6 +17,10 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [filterShow, setFilterShow] = useState(false);
+
+  useEffect(() => {
+    setFilterShow(false);
+  }, [location]);
 
   const logout = async () => {
     try {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Range, getTrackBackground } from "react-range";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
@@ -14,14 +14,19 @@ import Pagination from "../components/Pagination";
 import { useNavigate } from "react-router-dom";
 import ShopProductsSkeleton from "../components/skeletons/ShopProductsSkeleton";
 import useProductListing from "../hooks/useProductListing";
+import usePageSnapshot from "../hooks/usePageSnapshot";
 
 const Shops = () => {
   const { categorys } = useSelector((state) => state.home);
 
   const navigate = useNavigate();
-  const [styles, setStyles] = useState("grid");
+  const [saved, saveSnapshot] = usePageSnapshot("shop-controls");
+  const [styles, setStyles] = useState(saved?.styles ?? "grid");
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState(saved?.category ?? "");
+  useLayoutEffect(() => {
+    saveSnapshot({ styles, category });
+  }, [saveSnapshot, styles, category]);
   const {
     error,
     loading,
@@ -39,7 +44,7 @@ const Shops = () => {
     setSortPrice,
     sortPrice,
     totalProduct,
-  } = useProductListing({ category });
+  } = useProductListing({ category, preserveHistory: true });
   const [lowPrice, highPrice] = priceValues;
 
   const queryCategory = (value) => {

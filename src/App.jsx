@@ -37,13 +37,6 @@ function App() {
     dispatch(initialize_auth());
   }, [dispatch]);
 
-  useEffect(() => {
-    if ("scrollRestoration" in window.history) {
-      window.history.scrollRestoration = "manual";
-    }
-    window.scrollTo(0, 0);
-  }, []);
-
   return (
     <div className="max-w-screen min-h-screen">
       <BrowserRouter>

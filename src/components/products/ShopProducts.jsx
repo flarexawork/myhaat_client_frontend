@@ -174,6 +174,7 @@ const ShopProducts = ({ styles, products }) => {
         return (
           <article
             key={p._id || i}
+            data-scroll-item={`shop-${p._id || i}`}
             className={`group bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden ${
               styles === "grid"
                 ? "flex flex-col"
@@ -285,7 +286,7 @@ const ShopProducts = ({ styles, products }) => {
                 {/* Buy Now */}
                 <button
                   onClick={() => buy_now(p)}
-                  className="h-10 px-6 rounded-lg bg-orange-500 text-white font-medium hover:bg-orange-600 transition"
+                  className="h-10 px-5 sm:px-10 rounded-lg bg-orange-500 text-white font-medium hover:bg-orange-600 transition whitespace-nowrap inline-flex items-center justify-center"
                 >
                   Buy Now
                 </button>

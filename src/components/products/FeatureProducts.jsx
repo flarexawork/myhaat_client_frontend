@@ -183,6 +183,7 @@ const FeatureProducts = ({ products, loading = false, infinite = false }) => {
           return (
             <article
               key={p._id}
+              data-scroll-item={`featured-${p._id}`}
               onClick={() => openDetails(p.slug)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {

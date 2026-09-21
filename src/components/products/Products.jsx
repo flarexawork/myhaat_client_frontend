@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import ProductImage from "../ProductImage";
+import usePageSnapshot from "../../hooks/usePageSnapshot";
 
 const CollectionSkeleton = () => (
   <div className="flex flex-col gap-3">
@@ -24,6 +25,14 @@ const CollectionSkeleton = () => (
 );
 
 const Products = ({ title, products, loading = false }) => {
+  const carouselRef = useRef(null);
+  const restoredRef = useRef(false);
+  const [saved, saveSnapshot] = usePageSnapshot(`collection-${title}`);
+  useEffect(() => {
+    if (loading || !carouselRef.current || restoredRef.current) return;
+    restoredRef.current = true;
+    if (saved?.slide) carouselRef.current.goToSlide(saved.slide, true, false);
+  }, [loading, saved]);
   const titleMeta = {
     "Latest Product": {
       chip: "Fresh Picks",
@@ -103,6 +112,8 @@ const Products = ({ title, products, loading = false }) => {
         </>
       ) : (
       <Carousel
+        ref={carouselRef}
+        beforeChange={(slide) => saveSnapshot({ slide })}
         autoPlay={false}
         infinite={false}
         arrows={false}
@@ -123,6 +134,7 @@ const Products = ({ title, products, loading = false }) => {
               return (
                 <Link
                   key={j}
+                  data-scroll-item={`${title}-${product._id}`}
                   to={`/product/details/${product?.slug}`}
                   className="grid grid-cols-[96px_minmax(0,1fr)] items-center gap-3 rounded-xl border border-[#f3e4da] bg-white p-3 transition-all duration-300 group hover:bg-[#fff7f0] hover:shadow-md sm:grid-cols-[80px_minmax(0,1fr)]"
                 >

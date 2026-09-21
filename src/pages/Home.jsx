@@ -7,12 +7,16 @@ import FeatureProducts from '../components/products/FeatureProducts'
 import Products from '../components/products/Products'
 import Footer from '../components/Footer'
 import { get_products } from '../store/reducers/homeReducer'
+import { useNavigationType } from 'react-router-dom'
 const Home = () => {
     const dispatch = useDispatch()
+    const navigationType = useNavigationType()
     const {products, latest_product, topRated_product, discount_product, productsLoading } = useSelector(state => state.home)
     useEffect(() => {
-        dispatch(get_products())
-    }, [dispatch])
+        if (navigationType !== 'POP' || !products.length) dispatch(get_products())
+        // Retain loaded collections and infinite-scroll products on Back/Forward.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dispatch, navigationType])
     return (
         <div className='w-full'>
             <Heders />

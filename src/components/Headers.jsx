@@ -45,18 +45,18 @@ const socialIcons = [
     label: "Follow us on Instagram",
     icon: <FaInstagram />,
   },
-  {
-    key: "twitter",
-    href: socialLinks.twitter,
-    label: "Follow us on Twitter",
-    icon: <AiOutlineTwitter />,
-  },
-  {
-    key: "linkedin",
-    href: socialLinks.linkedin,
-    label: "Follow us on LinkedIn",
-    icon: <FaLinkedinIn />,
-  },
+  // {
+  //   key: "twitter",
+  //   href: socialLinks.twitter,
+  //   label: "Follow us on Twitter",
+  //   icon: <AiOutlineTwitter />,
+  // },
+  // {
+  //   key: "linkedin",
+  //   href: socialLinks.linkedin,
+  //   label: "Follow us on LinkedIn",
+  //   icon: <FaLinkedinIn />,
+  // },
   {
     key: "youtube",
     href: socialLinks.youtube,
